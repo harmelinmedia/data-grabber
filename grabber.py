@@ -1,144 +1,160 @@
+#!/usr/local/bin/python3
 
+# base imports
 import os, sys, json, logging
-import requests
 from datetime import datetime, timedelta
+
+# third-party library imports
+import requests
 from bs4 import BeautifulSoup
 from base64 import b64encode, b64decode
 
-class GrabberError(Exception):
-	pass
+# local imports
+from errors import *
 
-class GrabberAuthError(GrabberError):
-	pass
+# Conf objects
+class Conf(object):
 
-class GrabberAuthInvalidCredentials(GrabberAuthError):
-	pass
+	"""Thinking about finding a way to make urls and files available to Grabber object via attributes,
+	for example, instead of self.files['auth'], perhaps self.files.auth"""
 
-class GrabberAuthExpiredCredentials(GrabberAuthError):
-	pass
+	_required_keys = []
+	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file must contain valid JSON with the following key defined: [%s]"
 
-class GrabberAuthBadAuthFile(GrabberAuthError):
-	pass
+	def __init__(self, data):
+		print(self._required_keys)
+		self.check_requirements(data)
 
-class GrabberInitError(GrabberError):
-	pass
+	def check_requirements(self, data):
+		missing_keys = []
+		for key in self._required_keys:
+			if key not in data:
+				missing_keys.append(key)
+		if len(missing_keys) > 0:
+			raise ConfInitKeyError( self._init_keyerror_string % ( ', '.join(missing_keys), ', '.join(self._required_keys) ) )
 
-class GrabberInitUrlParseError(GrabberInitError):
-	pass
+	def dict_to_attr(self, data):
+		# assign conf values to Grabber object
+		for k, v in data.items():
+			if type(v) == str:
+				exec( "self.%s = \"%s\"" % (str(k), str(v)) )
+			else:
+				exec( "self.%s = %s" % (str(k), str(v)) )
 
-class GrabberInitKeyError(GrabberError, KeyError):
-	pass
+class FileConf(Conf):
+	_required_keys = ['tmp','auth']
+	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file `files` must contain valid JSON with the following key defined: [%s]"
 
-class GrabberInitFileError(GrabberError, OSError):
-	pass
+	def __init__(self, data):
+		super().__init__(data)
+		self.check_for_directories(data)
+		self.dict_to_attr(data)
+
+	def check_for_directories(self, data):
+		logging.debug('Checking for directories')
+
+		for key, val in data.items():
+			if not os.path.exists(val):
+				logging.debug("Creating directory: %s" % val)
+				os.makedirs(val)
+
+class URLConf(Conf):
+	_required_keys = ['auth','base','test']
+	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file `urls` must contain valid JSON with the following key defined: [%s]"
+
+	def __init__(self, data):
+		super().__init__(data)
+		self.dict_to_attr( self.parse_urls(data) )
+
+	def parse_urls(self, data):
+		logging.debug('Parsing urls')
+		key_queue = [key for key, val in data.items() if val[0] == '$']
+		# takes URL defined with $ALIAS and fills out urls
+		while 1: # repeat process until Error or finishing condition
+			aliases = { '$'+k.upper(): v for k, v in data.items() }
+			retry_queue = []
+			for key in key_queue:
+				val = data[key]
+				val_split = val.split('/')
+				try:
+					root = aliases[ val_split[0] ]
+					if root[0] == '$': 
+						retry_queue.append(key)
+					else:
+						data[key] = os.path.join( root, *val_split[1:] )
+				except KeyError:
+					raise GrabberInitUrlParseError("url alias %s not found. Please check url configurations in `conf` file." % val_split[0] )
+			if set(key_queue) == set(retry_queue):
+				raise GrabberInitUrlParseError("url alias %s not found. Please check url configurations in `conf` file. Look for self-referential loop in aliased URL definitions." % val_split[0] )
+			if len(retry_queue) <= 0:
+				break
+			else:
+				key_queue = retry_queue
+		return data
 
 
+# MAIN CLASS
 class Grabber(object):
 
 	"""
-	.conf file format.
+	`conf` file format. Must be valid JSON.
 
 	{
 		"name": "some-name-for-tmpfile-naming-scheme",
 		"files": {
-			"tmp_dir": "/path/to/tmp/dir/",
-			"auth_dir": "/path/to/file"
+			"tmp": "/path/to/tmp/dir/",
+			"auth": "/path/to/file"
 		},
-		"endpoints": {
+		"urls": {
 			"auth": "https://host.domain.url/auth/",
-			"base": "https://host.domain.url/endpoint/",
-			"test_auth": "$BASE/200endpoint/"
+			"base": "https://host.domain.url/url/",
+			"test_auth": "$BASE/200url/"
 		}
 	}
 
 	"""
 
+	_required_keys = ['name','files','urls']
 	_default_datetime_fmt = '%Y%m%d%H%M%S'
-	_required_conf_keys = ['name','files','endpoints']
-	_required_files = ['tmp','auth_data','auth_credentials']
-	_required_endpoints = ['auth','base','test_auth']
 
 	def __init__(self, conf):
-
 		logging.debug('Initializing Grabber')
+		self._parse_conf(conf) # load conf file
+		self.credentials_file = self.cpath("credentials")
+		self.token_file = self.cpath("token")
+		self.refresh_file = self.cpath("refresh")
+		self.credentials = self.parse_credentials() # set credentials
+		self.session_refresh() # create Grabber session
 
-		# load conf file
-		self._parse_conf(conf)
-
-		# parse endpoint definitions
-		self._parse_endpoints()
-
-		# create directories from config file
-		self._check_for_directories
-
-		# define Grabber session
-		self.session_refresh()
-
-	### universal methods that can be sublclassed without changing
-
-	def _parse_conf(self, conf):
-		with open(conf, 'r') as conf:
-			conf = json.load(conf)
+	### class methods
+	def _parse_conf(self, path):
+		try:
+			with open(path, 'r') as conf:
+				conf = json.load(conf)
+		except Exception:
+			raise GrabberInitFileError("Bad config file could not be read or parsed. Check to ensure file exists and contains valid JSON.\nPath: %s" % path)
 
 		# check conf file compliance
-		for key in self._required_conf_keys:
+		for key in self._required_keys:
 			if key not in conf:
-				raise GrabberInitKeyError( "Key Missing: %s\nConfiguration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (key, conf, ', '.join(self._required_conf_keys) ) )
+				raise GrabberInitKeyError( "Key Missing: %s\nConfiguration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (key, conf, ', '.join(self._required_keys) ) )
 
-		# ensure that default minimum endpoints are defined
-		for key in self._required_files:
-			if key not in conf['files']:
-				raise GrabberInitKeyError( "Key Missing: %s\nConfiguration file \"%s\" must contain valid JSON with the following file paths defined: [%s]" % (key, conf, ', '.join(self._required_endpoints) ) )
-		
-		# ensure that default minimum endpoints are defined
-		for key in self._required_endpoints:
-			if key not in conf['endpoints']:
-				raise GrabberInitKeyError( "Key Missing: %s\nConfiguration file \"%s\" must contain valid JSON with the following endpoints defined: [%s]" % (key, conf, ', '.join(self._required_endpoints) ) )
+		self.files = FileConf( conf["files"] )
+		self.urls = URLConf( conf["urls"] )
+		self.dict_to_attr(conf)
 
-		# assign conf values to Grabber object
-		for k, v in conf.items():
-			if k == "auth_credentials":
-				self.auth_credentials = self.parse_credentials(v)
-			elif k != "auth_credentials" and type(v) == str:
-				exec( "self.%s = \"%s\"" % (str(k), str(v)) )
-			else:
-				exec( "self.%s = %s" % (str(k), str(v)) )
+	def dict_to_attr(self, data):
+		# assign conf values to Grabber object attributes
+		for k, v in data.items():
+			if k not in ["files", "urls"]:
+				if type(v) == str:
+					exec( "self.%s = \"%s\"" % (str(k), str(v)) )
+				else:
+					exec( "self.%s = %s" % (str(k), str(v)) )
 
-	def _parse_endpoints(self):
-		logging.debug('Parsing endpoints')
-
-
-		key_queue = [key for key, val in self.endpoints.items() if val[0] == '$']
-
-		while 1: # repeat process until Error or finishing condition
-			aliases = { '$'+k.upper(): v for k, v in self.endpoints.items() }
-			retry_queue = []
-			for key in key_queue:
-				val = self.endpoints[key]
-				val_split = val.split('/')
-				try:
-					root = aliases[ val_split[0] ]
-					if root[0] == '$':
-						retry_queue.append(key)
-					else:
-						self.endpoints[key] = os.path.join( root, *val_split[1:] )
-				except KeyError:
-					raise GrabberInitUrlParseError("Endpoint alias %s not found. Please check endpoint configurations in .conf file." % val_split[0] )
-			if set(key_queue) == set(retry_queue):
-				raise GrabberInitUrlParseError("Endpoint alias %s not found. Please check endpoint configurations in .conf file. Look for infinite loop in URL definitions." % val_split[0] )
-			if len(retry_queue) <= 0:
-				break
-			else:
-				key_queue = retry_queue
-
-	def _check_for_directories(self):
-		logging.debug('Checking for directories')
-
-		for key, val in self.files.items():
-			if not os.path.exists(val):
-				logging.debug("Creating directory: %s" % val)
-				os.makedirs(val)
-
+	def cpath(self, cname):
+		"""helper method for defining full file paths for authentication files"""
+		return os.path.join( self.files.auth, cname)
 
 	def session_refresh(self):
 		logging.debug('Starting new session')
@@ -163,11 +179,14 @@ class Grabber(object):
 			test = self.test_auth()
 		return test
 
+	def fill_url(self, url, *args):
+		return url % args
+
 	def test_auth(self, *urlargs):
 		logging.debug('Testing authentication...',)
 		ro = requests.Request(
 					method = 'GET',
-					url = self.fill_url( self.endpoints['test_auth'], *urlargs)
+					url = self.fill_url( self.urls.test, *urlargs)
 					)
 		resp = self.send(ro)
 		if resp.status_code == requests.codes.ok:
@@ -176,15 +195,12 @@ class Grabber(object):
 			logging.debug(resp.text)
 			return False
 
-	def fill_url(self, url, *args):
-		return url % args
-
 	def download_to_tmp(self, ro, fname, ext='.csv'): # METHOD NEEDS FIXES TO MATCH THIS CLASS
 		"""takes streaming request object and saves to temporary file"""
 
 		logging.info('Saving temp file')
 
-		filepath = os.path.join( self.tmp,'_'.join([ 'tmpdata',self.name, fname, self.timestamp() ]) + ext )
+		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmpdata',self.name, fname, self.timestamp() ]) + ext )
 
 		with open( filepath, 'wb' ) as fout:
 			for chunk in ro.iter_content(chunk_size=1024**2): #1 mb per chunk
@@ -193,13 +209,13 @@ class Grabber(object):
 					fout.flush()
 		return filepath
 
-	### class specific methods
+	### subclass methods
 	def save_auth_to_file(self, text):
-		with open(self.auth_data, 'w') as af:
+		with open(self.token_file, 'w') as af:
 			af.write(text)
 
 	def load_auth_from_file(self):
-		if os.path.isfile(self.auth_data):
+		if os.path.isfile(self.token_file):
 			try:
 				return self.parse_auth_data()
 			except GrabberAuthBadAuthFile:
@@ -225,37 +241,17 @@ class Grabber(object):
 		"""Gets new authorization data from API, saves to file"""
 		raise NotImplementedError
 
-	def run_download_jobs(self):
-		raise NotImplementedError
+	# these might be defined in a scheduler class... not sure yet. Not used for now.
+	# def run_download_jobs(self):
+	# 	raise NotImplementedError
 
-	def run_parse_jobs(self):
-		raise NotImplementedError		
+	# def run_parse_jobs(self):
+	# 	raise NotImplementedError
 
-
-class TubeMogulGrabber(Grabber):
-
+class OneStepGrabber(Grabber):
 	def parse_credentials(self):
-		"""returns API credentials as dictionary"""
-		raise NotImplementedError
-	
-	def authenticate_request(self, ro):
-		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
-		raise NotImplementedError
-
-	def parse_auth_data(self, auth_fp):
-		"""Parses auth file, raises Exception if not successful"""
-		raise NotImplementedError
-
-	def refresh_auth_data(self):
-		"""Gets new authorization data from API, saves to file"""
-		raise NotImplementedError	
-
-
-class MediaMathGrabber(Grabber): 
-
-	def parse_credentials(self, path):
-		with open(path, 'r') as creds:
-			return json.load(creds)
+		with open(self.credentials_file, 'r') as cr:
+			return json.load(cr)
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -263,9 +259,31 @@ class MediaMathGrabber(Grabber): 
 		ro.cookies = auth
 		return ro
 
+
+class TubeMogulGrabber(OneStepGrabber):
+
 	def parse_auth_data(self):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.auth_data, 'r') as cookie:
+		with open(self.token_file, 'r') as tk:
+			auth = json.load(tk)
+			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
+				return auth['access_token']
+			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+
+	def refresh_auth_data(self):
+		"""Gets new authorization data from API, saves to file"""
+		print("Renewing authorization")
+		response = self.session.post( self.urls.auth, data=self.credentials)
+		if response.status_code == requests.codes.ok:
+			self.save_auth_to_file(response.text)
+		else:
+			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
+
+class MediaMathGrabber(OneStepGrabber):
+
+	def parse_auth_data(self):
+		"""Parses auth file, returns data, raises exception if unsuccessful"""
+		with open(self.token_file, 'r') as cookie:
 			cookie_soup = BeautifulSoup(cookie.read(), "html.parser")
 			if datetime.strptime(cookie_soup.result.session['expires'], "%Y-%m-%dT%H:%M:%S") - datetime.utcnow() > timedelta(hours=1):
 				return {'adama_session': cookie_soup.result.session['sessionid']}
@@ -274,7 +292,7 @@ class MediaMathGrabber(Grabber): 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
 		print("Renewing authorization")
-		response = self.session.post( self.endpoints['auth'], data=self.auth_credentials)
+		response = self.session.post( self.urls.auth, data=self.credentials)
 		if response.status_code == requests.codes.ok:
 			self.save_auth_to_file(response.text)
 		else:
@@ -283,12 +301,15 @@ class MediaMathGrabber(Grabber): 
 
 class GoogleGrabber(Grabber):
 
+	def __init__(self, conf):
+		super().__init__(conf)
+
 	def test_auth(self, *urlargs ):
 		return super().test_auth(self.profile_id, *urlargs)
 
-	def parse_credentials(self, path):
-		with open(path, 'r') as creds:
-			return json.load(creds)['installed']
+	def parse_credentials(self):
+		with open(self.credentials_file, 'r') as cr:
+			return json.load(cr)['installed']
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -298,8 +319,8 @@ class GoogleGrabber(Grabber):
 
 	def parse_auth_data(self):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.auth_data, 'r') as auth_data:
-			auth = json.load(auth_data)
+		with open(self.token_file, 'r') as tk:
+			auth = json.load(tk)
 			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
 				return auth['access_token']
 			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
@@ -308,10 +329,10 @@ class GoogleGrabber(Grabber):
 		"""Gets new authorization data from API, saves to file"""
 		print("Renewing authorization")
 
-		cr = self.auth_credentials
+		cr = self.credentials
 
 		try:
-			with open(self.auth_refresh, 'r') as tk:
+			with open(self.refresh_file, 'r') as tk:
 				auth = json.load(tk)
 		except Exception:
 			auth = {}
@@ -324,11 +345,11 @@ class GoogleGrabber(Grabber):
 				'grant_type' : 'refresh_token',
 				'redirect_uri' : cr['redirect_uris'][0]
 			}
-			response = self.session.post( self.endpoints['auth_token'], data=data )
+			response = self.session.post( self.urls.auth_token, data=data )
 			if response.status_code == requests.codes.ok:
 				response_data = json.loads(response.text)
 				response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
-				with open(self.auth_data, 'w') as out:
+				with open(self.token_file, 'w') as out:
 					json.dump(response_data, out)
 			else:
 				raise GrabberAuthInvalidCredentials('Token invalid. Authorization not granted.')
@@ -336,13 +357,13 @@ class GoogleGrabber(Grabber):
 		else:
 
 			params = {
-				'scope': ['https://www.googleapis.com/auth/dfareporting','https://www.googleapis.com/auth/analytics.readonly'],
+				'scope': self.scope,
 				'redirect_uri': cr['redirect_uris'][0],
 				'response_type': 'code',
 				'client_id': cr['client_id']
 			}
 
-			ro = requests.Request( url=self.endpoints['auth_access'], params=params )
+			ro = requests.Request( url=self.urls.auth_access, params=params )
 
 			print("\nGo to this url to authenticate app:\n\n%s\n" % ro.prepare().url)
 
@@ -356,17 +377,28 @@ class GoogleGrabber(Grabber):
 				'redirect_uri' : cr['redirect_uris'][0]
 			}
 
-			response = self.session.post( self.endpoints['auth_token'], data=data )
+			response = self.session.post( self.urls.auth_token, data=data )
 			if response.status_code == requests.codes.ok:
 				response_data = json.loads(response.text)
 				response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
-				with open(self.auth_data, 'w') as out:
+				with open(self.token_file, 'w') as out:
 					json.dump(response_data, out)
-				with open(self.auth_refresh, 'w') as out:
+				with open(self.refresh_file, 'w') as out:
 					json.dump(response_data, out)
 			else:
 				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
+class DFAGrabber(GoogleGrabber):
+
+	def __init__(self, conf):
+		super().__init__(conf)
+		self.scope = ['https://www.googleapis.com/auth/dfareporting']
+
+class GoogleAnalyticsGrabber(GoogleGrabber):
+
+	def __init__(self, conf):
+		super().__init__(conf)
+		self.scope = ['https://www.googleapis.com/auth/analytics.readonly']
 
 class PointrollGrabber(Grabber):
 
@@ -390,29 +422,38 @@ if __name__=="__main__":
 
 	logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) ## for local debugging
 
-	mma = MediaMathGrabber('mediamath/mm.conf')
-	# print(mma.endpoints)
-	print("Auth", mma.authenticate())
 
-	# dcm = DCMGrabber('dcm.conf')
+
+	# mma = MediaMathGrabber("mediamath/conf")
+	# print(mma.urls)
+	# print("Auth", mma.authenticate())
+
+	dcm = DFAGrabber('dcm/conf')
 
 	# print( dcm.fill_url("/auth/dfareporting/v2.2/userprofiles/%s/accounts", dcm.profile_id))
 
-	# print(mma.endpoints)
-	# print("Auth", dcm.test_auth())
+	# print(mma.urls)
+	print("Auth", dcm.authenticate())
 
-	parameters = {'filter':'agency_id=100480',
-		'dimensions':'campaign_name,tpas_placement_name,strategy_name',
-		'start_date':'2014-01-01',
-		'end_date':'2015-09-30',
-		'time_rollup':'by_month',
-		'metrics':'impressions,margin,adserving_cost,adverification_cost,privacy_compliance_cost,contextual_cost,dynamic_creative_cost,media_cost,optimization_fee,pmp_no_opto_fee,pmp_opto_fee,platform_access_fee,mm_data_cost,mm_total_fee,total_ad_cost,billed_spend,total_spend'}
+	# parameters = {'filter':'agency_id=100480',
+	# 	'dimensions':'campaign_name,tpas_placement_name,strategy_name',
+	# 	'start_date':'2015-09-23',
+	# 	'end_date':'2015-10-11',
+	# 	'time_rollup':'by_day',
+	# 	'metrics':'impressions,margin,adserving_cost,adverification_cost,privacy_compliance_cost,contextual_cost,dynamic_creative_cost,media_cost,optimization_fee,pmp_no_opto_fee,pmp_opto_fee,platform_access_fee,mm_data_cost,mm_total_fee,total_ad_cost,billed_spend,total_spend'}
+
+	# parameters = {'filter':'agency_id=100480&advertiser_id=149154&campaign_id=217122',
+	# 	'dimensions':'campaign_name,strategy_name,exchange_name',
+	# 	'start_date':'2015-09-23',
+	# 	'end_date':'2015-10-11',
+	# 	'time_rollup':'by_day',
+	# 	'metrics':'impressions,total_spend,billed_spend,post_click_conversions,post_view_conversions,total_conversions'}
 
 	# mma.authenticate()
 
-	# print(mma.endpoints['performance'])
+	# print(mma.urls['performance'])
 
-	# ro = requests.Request( method='get', url=mma.endpoints['meta'], params=parameters)
+	# ro = requests.Request( method='get', url=mma.urls['performance'], params=parameters)
 
 	# ro = mma.authenticate_request(ro)
 
@@ -420,8 +461,8 @@ if __name__=="__main__":
 
 	# resp = mma.send(ro)
 
-	# # mma.download_to_tmp(resp, 'mm-performance-metadata')
-	# # print("Done")
+	# mma.download_to_tmp(resp, 'mm-perform-data')
+	# print("Done")
 
 	# from pprint import pprint as pp
 	# pp(resp.text)
