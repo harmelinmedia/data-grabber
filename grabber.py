@@ -3,11 +3,11 @@
 # base imports
 import os, sys, json, logging
 from datetime import datetime, timedelta
+from base64 import b64encode, b64decode
 
 # third-party library imports
 import requests
 from bs4 import BeautifulSoup
-from base64 import b64encode, b64decode
 
 # local imports
 from errors import *

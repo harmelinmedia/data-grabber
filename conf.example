@@ -1,0 +1,12 @@
+{
+	"name": "some-api-name",
+	"files": {
+		"tmp": "/path/to/tmp/dir",
+		"auth": "/path/to/file"
+	},
+	"urls": {
+		"auth": "https://host.domain.url/auth",
+		"base": "https://host.domain.url/url",
+		"test_auth": "$BASE/200url/"
+	}
+}
