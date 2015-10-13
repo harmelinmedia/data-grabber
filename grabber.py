@@ -273,12 +273,13 @@ class TubeMogulGrabber(Grabber):
 		logging.debug("Renewing authorization")
 
 		clid, sk = self.credentials["client_id"], self.credentials["secret_key"]
+		params={"grant_type":"client_credentials"}
 
 		header = {"Cache-Control":"no-cache",
 			"Content-Type":"application/x-www-form-urlencoded",
 			"Authorization":"Basic " + b64encode(str(clid+":"+sk).encode('utf8')).decode('ascii')}
 
-		response = self.session.post( self.urls.auth, data=self.credentials)
+		response = self.session.post( self.urls.auth, headers=header, params=params)
 
 		if response.status_code == requests.codes.ok:
 			response_data = json.loads(response.text)

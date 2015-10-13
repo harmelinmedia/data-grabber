@@ -1,0 +1,14 @@
+{
+	"name": "mediamath",
+	"files": {
+		"tmp": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/data",
+		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/mediamath"
+	},
+	"urls": {
+		"base": "https://api.mediamath.com/reporting/v1/std",
+		"auth": "https://api.mediamath.com/api/v2.0/login",
+		"test": "$BASE/meta",
+		"performance": "$BASE/performance",
+		"meta": "$PERFORMANCE/meta"
+	}
+}

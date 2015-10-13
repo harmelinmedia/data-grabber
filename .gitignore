@@ -1,0 +1,6 @@
+
+#protected file exts
+*.csv
+credentials
+token
+refresh

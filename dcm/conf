@@ -1,0 +1,15 @@
+{
+	"name": "dcm",
+	"files": {
+		"tmp": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/data",
+		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/dcm"
+	},
+	"urls": {
+		"auth": "https://accounts.google.com/o/oauth2",
+		"auth_access": "$AUTH/auth",
+		"auth_token": "$AUTH/token",
+		"base": "https://www.googleapis.com/dfareporting/v2.2",
+		"test": "$BASE/userprofiles/%s"
+	},
+	"profile_id": "1252691"
+}
