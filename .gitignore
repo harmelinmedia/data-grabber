@@ -4,3 +4,6 @@
 credentials
 token
 refresh
+.DS_Store
+__pycache__
+*.pyc
