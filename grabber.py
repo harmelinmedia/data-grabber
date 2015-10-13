@@ -19,7 +19,7 @@ class Conf(object):
 	for example, instead of self.files['auth'], perhaps self.files.auth"""
 
 	_required_keys = []
-	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file must contain valid JSON with the following key defined: [%s]"
+	_init_keyerror_string = "Keys Missing: [%s] Configuration file must contain valid JSON with the following key defined: [%s]"
 
 	def __init__(self, data):
 		print(self._required_keys)
@@ -43,7 +43,7 @@ class Conf(object):
 
 class FileConf(Conf):
 	_required_keys = ['tmp','auth']
-	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file `files` must contain valid JSON with the following key defined: [%s]"
+	_init_keyerror_string = "Keys Missing: [%s] Configuration file `files` must contain valid JSON with the following key defined: [%s]"
 
 	def __init__(self, data):
 		super().__init__(data)
@@ -60,7 +60,7 @@ class FileConf(Conf):
 
 class URLConf(Conf):
 	_required_keys = ['auth','base','test']
-	_init_keyerror_string = "Keys Missing: [%s]\nConfiguration file `urls` must contain valid JSON with the following key defined: [%s]"
+	_init_keyerror_string = "Keys Missing: [%s] Configuration file `urls` must contain valid JSON with the following key defined: [%s]"
 
 	def __init__(self, data):
 		super().__init__(data)
@@ -137,7 +137,7 @@ class Grabber(object):
 		# check conf file compliance
 		for key in self._required_keys:
 			if key not in conf:
-				raise GrabberInitKeyError( "Key Missing: %s\nConfiguration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (key, conf, ', '.join(self._required_keys) ) )
+				raise GrabberInitKeyError( "Key Missing: %s Configuration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (key, path, ', '.join(self._required_keys) ) )
 
 		self.files = FileConf( conf["files"] )
 		self.urls = URLConf( conf["urls"] )
@@ -248,7 +248,51 @@ class Grabber(object):
 	# def run_parse_jobs(self):
 	# 	raise NotImplementedError
 
-class OneStepGrabber(Grabber):
+class TubeMogulGrabber(Grabber):
+
+	def parse_credentials(self):
+		with open(self.credentials_file, 'r') as cr:
+			return json.load(cr)
+
+	def authenticate_request(self, ro):
+		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
+		token = self.load_auth_from_file()
+		ro.headers = {"Authorization": "Bearer " + token}
+		return ro
+
+	def parse_auth_data(self):
+		"""Parses auth file, returns data, raises exception if unsuccessful"""
+		with open(self.token_file, 'r') as tk:
+			auth = json.load(tk)
+			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
+				return auth['token']
+			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+
+	def refresh_auth_data(self):
+		"""Gets new authorization data from API, saves to file"""
+		logging.debug("Renewing authorization")
+
+		clid, sk = self.credentials["client_id"], self.credentials["secret_key"]
+
+		header = {"Cache-Control":"no-cache",
+			"Content-Type":"application/x-www-form-urlencoded",
+			"Authorization":"Basic " + b64encode(str(clid+":"+sk).encode('utf8')).decode('ascii')}
+
+		response = self.session.post( self.urls.auth, data=self.credentials)
+
+		if response.status_code == requests.codes.ok:
+			response_data = json.loads(response.text)
+			response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
+			with open(self.token_file, 'w') as out:
+				json.dump(response_data, out)
+		else:
+			logging.debug(header)
+			logging.debug(response.text)
+			raise GrabberAuthInvalidCredentials('Token invalid. Authorization not granted.')
+
+
+class MediaMathGrabber(Grabber):
+
 	def parse_credentials(self):
 		with open(self.credentials_file, 'r') as cr:
 			return json.load(cr)
@@ -258,28 +302,6 @@ class OneStepGrabber(Grabber):
 		auth = self.load_auth_from_file()
 		ro.cookies = auth
 		return ro
-
-
-class TubeMogulGrabber(OneStepGrabber):
-
-	def parse_auth_data(self):
-		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as tk:
-			auth = json.load(tk)
-			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
-				return auth['access_token']
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
-
-	def refresh_auth_data(self):
-		"""Gets new authorization data from API, saves to file"""
-		print("Renewing authorization")
-		response = self.session.post( self.urls.auth, data=self.credentials)
-		if response.status_code == requests.codes.ok:
-			self.save_auth_to_file(response.text)
-		else:
-			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
-
-class MediaMathGrabber(OneStepGrabber):
 
 	def parse_auth_data(self):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
@@ -291,7 +313,7 @@ class MediaMathGrabber(OneStepGrabber):
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
-		print("Renewing authorization")
+		logging.debug("Renewing authorization")
 		response = self.session.post( self.urls.auth, data=self.credentials)
 		if response.status_code == requests.codes.ok:
 			self.save_auth_to_file(response.text)
@@ -327,7 +349,7 @@ class GoogleGrabber(Grabber):
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
-		print("Renewing authorization")
+		logging.debug("Renewing authorization")
 
 		cr = self.credentials
 
@@ -422,18 +444,17 @@ if __name__=="__main__":
 
 	logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) ## for local debugging
 
-
-
 	# mma = MediaMathGrabber("mediamath/conf")
 	# print(mma.urls)
 	# print("Auth", mma.authenticate())
 
-	dcm = DFAGrabber('dcm/conf')
+	# dcm = DFAGrabber('dcm/conf')
 
 	# print( dcm.fill_url("/auth/dfareporting/v2.2/userprofiles/%s/accounts", dcm.profile_id))
 
 	# print(mma.urls)
-	print("Auth", dcm.authenticate())
+	tm = TubeMogulGrabber('tubemogul/conf')
+	print("Auth", tm.authenticate())
 
 	# parameters = {'filter':'agency_id=100480',
 	# 	'dimensions':'campaign_name,tpas_placement_name,strategy_name',
@@ -468,7 +489,4 @@ if __name__=="__main__":
 	# pp(resp.text)
 
 	# print("Auth:", mma.has_auth())
-
-	
-
 
