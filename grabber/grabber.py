@@ -15,8 +15,26 @@ from errors import *
 # Conf objects
 class Conf(object):
 
-	"""Thinking about finding a way to make urls and files available to Grabber object via attributes,
-	for example, instead of self.files['auth'], perhaps self.files.auth"""
+	"""Conf objects make config file definitions available like so:
+
+	{
+		"name":"some-name",
+		"urls": {
+			"url1":"http://some.url",
+			"url2":"http://some_other.url"
+		}
+		...etc...
+	}
+
+	These can be accessed as attributes.
+
+	$ print(self.name)
+	some-name
+
+	$ print(self.urls.url1)
+	"http://some.url"
+
+	"""
 
 	_required_keys = []
 	_init_keyerror_string = "Keys Missing: [%s] Configuration file must contain valid JSON with the following key defined: [%s]"
@@ -100,7 +118,7 @@ class Grabber(object):
 	`conf` file format. Must be valid JSON.
 
 	{
-		"name": "some-name-for-tmpfile-naming-scheme",
+		"name": "some-api-name",
 		"files": {
 			"tmp": "/path/to/tmp/dir/",
 			"auth": "/path/to/file"
@@ -135,9 +153,12 @@ class Grabber(object):
 			raise GrabberInitFileError("Bad config file could not be read or parsed. Check to ensure file exists and contains valid JSON.\nPath: %s" % path)
 
 		# check conf file compliance
+		missing_keys = []
 		for key in self._required_keys:
-			if key not in conf:
-				raise GrabberInitKeyError( "Key Missing: %s Configuration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (key, path, ', '.join(self._required_keys) ) )
+			if key not in data:
+				missing_keys.append(key)
+		if len(missing_keys) > 0:
+			raise GrabberInitKeyError( "Key Missing: %s Configuration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (', '.join(missing_keys), path, ', '.join(self._required_keys) ) )
 
 		self.files = FileConf( conf["files"] )
 		self.urls = URLConf( conf["urls"] )
