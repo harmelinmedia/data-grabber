@@ -2,7 +2,7 @@
 	"name": "mediamath",
 	"files": {
 		"tmp": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/data",
-		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/mediamath"
+		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/apis/mediamath"
 	},
 	"urls": {
 		"base": "https://api.mediamath.com/reporting/v1/std",

@@ -2,23 +2,21 @@
 
 A framework for reliable ETL from REST API data sources.
 
-
-`dgjobs.conf`
-
-[
-	{
-	"api":"dcm",
-	"auth_dir":"path/to/dir",
-	"jobs": [ { "profileId":99999, "reportId":99999 } ]
-},
-
+Example Configuration File
+```
 {
-	"api":"mediamath",
-	"auth_dir":"path/to/dir",
-	"jobs": [ {} ]
-
+	"name": "some-api-name",
+	"files": {
+		"tmp": "/path/to/tmp/dir/",
+		"auth": "/path/to/file"
+	},
+	"urls": {
+		"auth": "https://host.domain.url/auth/",
+		"base": "https://host.domain.url/url/",
+		"test_auth": "$BASE/200url/"
+	}
 }
-
+```
 
 
 

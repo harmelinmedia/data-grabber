@@ -1,0 +1,23 @@
+{
+	"name": "pointroll",
+	"files": {
+		"tmp": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/data",
+		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/apis/pointroll", 
+	},
+	"urls": {
+		"base": "https://reportapi.pointroll.com",
+		"auth": "$BASE/user/login",
+		"test": "https://host.domain.url/200endpoint/"
+
+		"report":"$BASE/Report",
+		"runasync":"$REPORT/RunAsync",
+		"status":"$REPORT/Status",
+		"pickup":"$REPORT/Pickup",
+
+		"meta_advertiser":"$BASE/Advertiser/Get",
+		"meta_metric":"$BASE/Metric/Get",
+		"meta_campaign":"$BASE/Campaign/Get",
+		"meta_aggregation":"$BASE/Aggregation/Get",
+
+	}
+}

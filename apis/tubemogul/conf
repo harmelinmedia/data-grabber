@@ -2,7 +2,7 @@
 	"name": "tubemogul",
 	"files": {
 		"tmp": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/data",
-		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/tubemogul"
+		"auth": "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/apis/tubemogul"
 	},
 	"urls": {
 		"base": "https://api.tubemogul.com",

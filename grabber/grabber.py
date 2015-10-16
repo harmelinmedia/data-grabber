@@ -10,12 +10,12 @@ import requests
 from bs4 import BeautifulSoup
 
 # local imports
-from errors import *
+from .errors import *
 
 # Conf objects
 class Conf(object):
 
-	"""Conf objects make config file definitions available like so:
+	"""Conf objects make config file definitions available as class attributes like so:
 
 	{
 		"name":"some-name",
@@ -26,13 +26,13 @@ class Conf(object):
 		...etc...
 	}
 
-	These can be accessed as attributes.
+	These can be accessed as attributes of the Conf class, for example:
 
-	$ print(self.name)
-	some-name
+		$ print(self.name)
+		some-name
 
-	$ print(self.urls.url1)
-	"http://some.url"
+		$ print(self.urls.url1)
+		http://some.url
 
 	"""
 
@@ -40,10 +40,10 @@ class Conf(object):
 	_init_keyerror_string = "Keys Missing: [%s] Configuration file must contain valid JSON with the following key defined: [%s]"
 
 	def __init__(self, data):
-		print(self._required_keys)
 		self.check_requirements(data)
 
 	def check_requirements(self, data):
+		# ensures that all necessary keys are defined in config
 		missing_keys = []
 		for key in self._required_keys:
 			if key not in data:
@@ -101,9 +101,9 @@ class URLConf(Conf):
 					else:
 						data[key] = os.path.join( root, *val_split[1:] )
 				except KeyError:
-					raise GrabberInitUrlParseError("url alias %s not found. Please check url configurations in `conf` file." % val_split[0] )
+					raise ConfInitUrlParseErrorAliasNotFound("URL alias %s not found. Please check url configurations in `conf` file." % val_split[0] )
 			if set(key_queue) == set(retry_queue):
-				raise GrabberInitUrlParseError("url alias %s not found. Please check url configurations in `conf` file. Look for self-referential loop in aliased URL definitions." % val_split[0] )
+				raise ConfInitUrlParseErrorSelfReferringAlias("URL alias %s not found. Please check url configurations in `conf` file. Look for self-referential loop in aliased URL definitions." % val_split[0] )
 			if len(retry_queue) <= 0:
 				break
 			else:
@@ -141,14 +141,14 @@ class Grabber(object):
 		self.credentials_file = self.cpath("credentials")
 		self.token_file = self.cpath("token")
 		self.refresh_file = self.cpath("refresh")
-		self.credentials = self.parse_credentials() # set credentials
+		self.credentials = self.prep_credentials() # set credentials
 		self.session_refresh() # create Grabber session
 
 	### class methods
 	def _parse_conf(self, path):
 		try:
 			with open(path, 'r') as conf:
-				conf = json.load(conf)
+				data = json.load(conf)
 		except Exception:
 			raise GrabberInitFileError("Bad config file could not be read or parsed. Check to ensure file exists and contains valid JSON.\nPath: %s" % path)
 
@@ -160,9 +160,9 @@ class Grabber(object):
 		if len(missing_keys) > 0:
 			raise GrabberInitKeyError( "Key Missing: %s Configuration file \"%s\" must contain valid JSON with the following keys defined: [%s]" % (', '.join(missing_keys), path, ', '.join(self._required_keys) ) )
 
-		self.files = FileConf( conf["files"] )
-		self.urls = URLConf( conf["urls"] )
-		self.dict_to_attr(conf)
+		self.files = FileConf( data["files"] )
+		self.urls = URLConf( data["urls"] )
+		self.dict_to_attr(data)
 
 	def dict_to_attr(self, data):
 		# assign conf values to Grabber object attributes
@@ -187,6 +187,15 @@ class Grabber(object):
 			return datetime.now()
 		return datetime.now().strftime(fmt)
 
+	def prep_credentials(self):
+		try:
+			with open(self.credentials_file, 'r') as fp:
+				return self.parse_credentials(fp)
+		except FileNotFoundError:
+			raise GrabberAuthMissingCredentialsFile("Credentials file was not found.")
+		except Exception as e:
+			raise GrabberAuthBadCredentialsFile("Credentials file could not be parsed.: "+e)
+
 	def send(self, ro):
 		logging.info('Sending request')
 		ro = self.authenticate_request(ro)
@@ -194,11 +203,14 @@ class Grabber(object):
 
 	def authenticate(self):
 		logging.debug('Authenticating...')
-		test = self.test_auth()
-		if not test:
-			self.refresh_auth_data()
+		try:
 			test = self.test_auth()
-		return test
+			if not test:
+				self.refresh_auth_data()
+				test = self.test_auth()
+			return test
+		except requests.exceptions.ConnectionError:
+			raise GrabberHTTPConnectionError("Connection could not be established. You may not be connected to the Internet.")
 
 	def fill_url(self, url, *args):
 		return url % args
@@ -221,7 +233,7 @@ class Grabber(object):
 
 		logging.info('Saving temp file')
 
-		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmpdata',self.name, fname, self.timestamp() ]) + ext )
+		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmpdata', self.name, fname, self.timestamp() ]) + ext )
 
 		with open( filepath, 'wb' ) as fout:
 			for chunk in ro.iter_content(chunk_size=1024**2): #1 mb per chunk
@@ -236,17 +248,15 @@ class Grabber(object):
 			af.write(text)
 
 	def load_auth_from_file(self):
-		if os.path.isfile(self.token_file):
-			try:
-				return self.parse_auth_data()
-			except GrabberAuthBadAuthFile:
-				self.refresh_auth_data() 
-				return self.parse_auth_data()
-		else:
+		try:
+			with open(self.token_file, 'r') as tk:
+				return self.parse_auth_data(tk)
+		except (FileNotFoundError, GrabberAuthBadAuthFile):
 			self.refresh_auth_data()
-			return self.parse_auth_data()
+			with open(self.token_file, 'r') as tk:
+				return self.parse_auth_data(tk)
 
-	def parse_credentials(self):
+	def parse_credentials(self, fp):
 		"""returns API credentials as dictionary"""
 		raise NotImplementedError
 	
@@ -254,7 +264,7 @@ class Grabber(object):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
 		raise NotImplementedError
 
-	def parse_auth_data(self, auth_fp):
+	def parse_auth_data(self, fp):
 		"""Parses auth file, raises Exception if not successful"""
 		raise NotImplementedError
 
@@ -271,9 +281,8 @@ class Grabber(object):
 
 class TubeMogulGrabber(Grabber):
 
-	def parse_credentials(self):
-		with open(self.credentials_file, 'r') as cr:
-			return json.load(cr)
+	def parse_credentials(self, fp):
+		return json.load(fp)
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -281,13 +290,12 @@ class TubeMogulGrabber(Grabber):
 		ro.headers = {"Authorization": "Bearer " + token}
 		return ro
 
-	def parse_auth_data(self):
+	def parse_auth_data(self, fp):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as tk:
-			auth = json.load(tk)
-			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
-				return auth['token']
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+		auth = json.load(fp)
+		if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
+			return auth['token']
+		raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
@@ -300,7 +308,7 @@ class TubeMogulGrabber(Grabber):
 			"Content-Type":"application/x-www-form-urlencoded",
 			"Authorization":"Basic " + b64encode(str(clid+":"+sk).encode('utf8')).decode('ascii')}
 
-		response = self.session.post( self.urls.auth, headers=header, params=params)
+		response = self.session.post( self.urls.auth, headers=header, data=params)
 
 		if response.status_code == requests.codes.ok:
 			response_data = json.loads(response.text)
@@ -315,9 +323,8 @@ class TubeMogulGrabber(Grabber):
 
 class MediaMathGrabber(Grabber):
 
-	def parse_credentials(self):
-		with open(self.credentials_file, 'r') as cr:
-			return json.load(cr)
+	def parse_credentials(self, fp):
+		return json.load(fp)
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -325,13 +332,12 @@ class MediaMathGrabber(Grabber):
 		ro.cookies = auth
 		return ro
 
-	def parse_auth_data(self):
+	def parse_auth_data(self, fp):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as cookie:
-			cookie_soup = BeautifulSoup(cookie.read(), "html.parser")
-			if datetime.strptime(cookie_soup.result.session['expires'], "%Y-%m-%dT%H:%M:%S") - datetime.utcnow() > timedelta(hours=1):
-				return {'adama_session': cookie_soup.result.session['sessionid']}
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+		cookie = BeautifulSoup(fp.read(), "html.parser")
+		if datetime.strptime(cookie.result.session['expires'], "%Y-%m-%dT%H:%M:%S") - datetime.utcnow() > timedelta(hours=1):
+			return {'adama_session': cookie.result.session['sessionid']}
+		raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
@@ -351,9 +357,8 @@ class GoogleGrabber(Grabber):
 	def test_auth(self, *urlargs ):
 		return super().test_auth(self.profile_id, *urlargs)
 
-	def parse_credentials(self):
-		with open(self.credentials_file, 'r') as cr:
-			return json.load(cr)['installed']
+	def parse_credentials(self, fp):
+		return json.load(fp)['installed']
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -361,13 +366,12 @@ class GoogleGrabber(Grabber):
 		ro.headers = {"Authorization": "Bearer " + token}
 		return ro
 
-	def parse_auth_data(self):
+	def parse_auth_data(self, fp):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as tk:
-			auth = json.load(tk)
-			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
-				return auth['access_token']
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+		auth = json.load(fp)
+		if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
+			return auth['access_token']
+		raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
@@ -432,35 +436,48 @@ class GoogleGrabber(Grabber):
 			else:
 				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
-class DFAGrabber(GoogleGrabber):
-
-	def __init__(self, conf):
-		super().__init__(conf)
-		self.scope = ['https://www.googleapis.com/auth/dfareporting']
+class DCMGrabber(GoogleGrabber):
+	scope = ['https://www.googleapis.com/auth/dfareporting']
 
 class GoogleAnalyticsGrabber(GoogleGrabber):
+	scope = ['https://www.googleapis.com/auth/analytics.readonly']
 
-	def __init__(self, conf):
-		super().__init__(conf)
-		self.scope = ['https://www.googleapis.com/auth/analytics.readonly']
 
 class PointrollGrabber(Grabber):
 
+	default_headers = {
+		'content-type':'application/json; charset=utf-8',
+		'accept':'application/json; charset=utf-8'
+		}
+
 	def parse_credentials(self):
-		"""returns API credentials as dictionary"""
-		raise NotImplementedError
+		return json.load(fp)
 	
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
-		raise NotImplementedError
+		### FIX THIS
+		token = self.load_auth_from_file()
+		ro.headers = self.default_headers
+		ro.headers["token"] = token
+		return ro
 
-	def parse_auth_data(self, auth_fp):
-		"""Parses auth file, raises Exception if not successful"""
-		raise NotImplementedError
+	def parse_auth_data(self):
+		"""Parses auth file, returns data, raises exception if unsuccessful"""
+		with open(self.token_file, 'r') as tk:
+			auth = json.load(tk)
+			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
+				return auth['token']
+			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
-		raise NotImplementedError
+		logging.debug("Renewing authorization")
+		response = self.session.post( self.urls.auth, params=self.credentials, headers=self.default_headers)
+		if response.status_code == requests.codes.ok:
+			self.save_auth_to_file(response.headers)
+		else:
+			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
+		
 
 if __name__=="__main__":
 
@@ -475,8 +492,8 @@ if __name__=="__main__":
 	# print( dcm.fill_url("/auth/dfareporting/v2.2/userprofiles/%s/accounts", dcm.profile_id))
 
 	# print(mma.urls)
-	tm = TubeMogulGrabber('tubemogul/conf')
-	print("Auth", tm.authenticate())
+	# tm = TubeMogulGrabber('tubemogul/conf')
+	# print("Auth", tm.authenticate())
 
 	# parameters = {'filter':'agency_id=100480',
 	# 	'dimensions':'campaign_name,tpas_placement_name,strategy_name',
@@ -484,6 +501,13 @@ if __name__=="__main__":
 	# 	'end_date':'2015-10-11',
 	# 	'time_rollup':'by_day',
 	# 	'metrics':'impressions,margin,adserving_cost,adverification_cost,privacy_compliance_cost,contextual_cost,dynamic_creative_cost,media_cost,optimization_fee,pmp_no_opto_fee,pmp_opto_fee,platform_access_fee,mm_data_cost,mm_total_fee,total_ad_cost,billed_spend,total_spend'}
+
+	# parameters = {'filter':'agency_id=100480&advertiser_id=149154&campaign_id=217122',
+	# 	'dimensions':'campaign_name,strategy_name,exchange_name',
+	# 	'start_date':'2015-09-23',
+	# 	'end_date':'2015-10-11',
+	# 	'time_rollup':'by_day',
+	# 	'metrics':'impressions,total_spend,billed_spend,post_click_conversions,post_view_conversions,total_conversions'}
 
 	# parameters = {'filter':'agency_id=100480&advertiser_id=149154&campaign_id=217122',
 	# 	'dimensions':'campaign_name,strategy_name,exchange_name',
