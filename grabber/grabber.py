@@ -69,12 +69,13 @@ class FileConf(Conf):
 		self.dict_to_attr(data)
 
 	def check_for_directories(self, data):
-		logging.debug('Checking for directories')
+		logging.debug('Checking for non-auth directories')
 
 		for key, val in data.items():
-			if not os.path.exists(val):
-				logging.debug("Creating directory: %s" % val)
-				os.makedirs(val)
+			if key != "auth":
+				if not os.path.exists(val):
+					logging.debug("Creating directory: %s" % val)
+					os.makedirs(val)
 
 class URLConf(Conf):
 	_required_keys = ['auth','base','test']
@@ -196,10 +197,17 @@ class Grabber(object):
 		except Exception as e:
 			raise GrabberAuthBadCredentialsFile("Credentials file could not be parsed.: "+e)
 
-	def send(self, ro):
+	def send(self, ro, stream=True):
+		"""Authenticates request using `authenticate_request` method defined in subclass before sending"""
 		logging.info('Sending request')
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
+	
+	def request(self, url, method="get", headers=None, params=None, data=None, stream=True, *urlargs):
+		"""Wrapper method to make an authenticated request in a single function call"""
+		ro = requests.Request(method=method, url=self.fill_url(url, *urlargs), params=params, data=data)
+		self.session.stream = stream
+		return self.send(ro)
 
 	def authenticate(self):
 		logging.debug('Authenticating...')
@@ -228,19 +236,20 @@ class Grabber(object):
 			logging.debug(resp.text)
 			return False
 
-	def download_to_tmp(self, ro, fname, ext='.csv'): # METHOD NEEDS FIXES TO MATCH THIS CLASS
-		"""takes streaming request object and saves to temporary file"""
-
+	def download_to_tmp(self, ro, fname, ext='.csv', chunk_size_mb=5):
+		"""takes streaming request object and saves to temporary file, default chunk size is 5 Mb"""
 		logging.info('Saving temp file')
-
-		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmpdata', self.name, fname, self.timestamp() ]) + ext )
-
+		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmp', self.name, fname, self.timestamp() ]) + ext )
 		with open( filepath, 'wb' ) as fout:
-			for chunk in ro.iter_content(chunk_size=1024**2): #1 mb per chunk
+			for chunk in ro.iter_content( chunk_size= chunk_size_mb * 2**20): #n mb per chunk
 				if chunk:
 					fout.write(chunk)
 					fout.flush()
 		return filepath
+
+	def request_download(self, url, fname, ext=".csv", method="get", headers=None, params=None, data=None, stream=True, *urlargs):
+		"""Wrapper method to make a request a download data in the same function call"""
+		return self.download_to_tmp( ro = self.request(url=url, method=method, headers=headers, params=params, data=data, stream=stream, *urlargs ), fname=fname, ext=ext )
 
 	### subclass methods
 	def save_auth_to_file(self, text):
@@ -271,13 +280,6 @@ class Grabber(object):
 	def refresh_auth_data(self):
 		"""Gets new authorization data from API, saves to file"""
 		raise NotImplementedError
-
-	# these might be defined in a scheduler class... not sure yet. Not used for now.
-	# def run_download_jobs(self):
-	# 	raise NotImplementedError
-
-	# def run_parse_jobs(self):
-	# 	raise NotImplementedError
 
 class TubeMogulGrabber(Grabber):
 
@@ -318,7 +320,7 @@ class TubeMogulGrabber(Grabber):
 		else:
 			logging.debug(header)
 			logging.debug(response.text)
-			raise GrabberAuthInvalidCredentials('Token invalid. Authorization not granted.')
+			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
 
 class MediaMathGrabber(Grabber):
@@ -400,7 +402,7 @@ class GoogleGrabber(Grabber):
 				with open(self.token_file, 'w') as out:
 					json.dump(response_data, out)
 			else:
-				raise GrabberAuthInvalidCredentials('Token invalid. Authorization not granted.')
+				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
 		else:
 
@@ -462,6 +464,7 @@ class PointrollGrabber(Grabber):
 		return ro
 
 	def parse_auth_data(self):
+		# FIX THIS TOO
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
 		with open(self.token_file, 'r') as tk:
 			auth = json.load(tk)
@@ -470,6 +473,7 @@ class PointrollGrabber(Grabber):
 			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
+		# ALSO FIX THIS
 		"""Gets new authorization data from API, saves to file"""
 		logging.debug("Renewing authorization")
 		response = self.session.post( self.urls.auth, params=self.credentials, headers=self.default_headers)
@@ -481,58 +485,4 @@ class PointrollGrabber(Grabber):
 
 if __name__=="__main__":
 
-	logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) ## for local debugging
-
-	# mma = MediaMathGrabber("mediamath/conf")
-	# print(mma.urls)
-	# print("Auth", mma.authenticate())
-
-	# dcm = DFAGrabber('dcm/conf')
-
-	# print( dcm.fill_url("/auth/dfareporting/v2.2/userprofiles/%s/accounts", dcm.profile_id))
-
-	# print(mma.urls)
-	# tm = TubeMogulGrabber('tubemogul/conf')
-	# print("Auth", tm.authenticate())
-
-	# parameters = {'filter':'agency_id=100480',
-	# 	'dimensions':'campaign_name,tpas_placement_name,strategy_name',
-	# 	'start_date':'2015-09-23',
-	# 	'end_date':'2015-10-11',
-	# 	'time_rollup':'by_day',
-	# 	'metrics':'impressions,margin,adserving_cost,adverification_cost,privacy_compliance_cost,contextual_cost,dynamic_creative_cost,media_cost,optimization_fee,pmp_no_opto_fee,pmp_opto_fee,platform_access_fee,mm_data_cost,mm_total_fee,total_ad_cost,billed_spend,total_spend'}
-
-	# parameters = {'filter':'agency_id=100480&advertiser_id=149154&campaign_id=217122',
-	# 	'dimensions':'campaign_name,strategy_name,exchange_name',
-	# 	'start_date':'2015-09-23',
-	# 	'end_date':'2015-10-11',
-	# 	'time_rollup':'by_day',
-	# 	'metrics':'impressions,total_spend,billed_spend,post_click_conversions,post_view_conversions,total_conversions'}
-
-	# parameters = {'filter':'agency_id=100480&advertiser_id=149154&campaign_id=217122',
-	# 	'dimensions':'campaign_name,strategy_name,exchange_name',
-	# 	'start_date':'2015-09-23',
-	# 	'end_date':'2015-10-11',
-	# 	'time_rollup':'by_day',
-	# 	'metrics':'impressions,total_spend,billed_spend,post_click_conversions,post_view_conversions,total_conversions'}
-
-	# mma.authenticate()
-
-	# print(mma.urls['performance'])
-
-	# ro = requests.Request( method='get', url=mma.urls['performance'], params=parameters)
-
-	# ro = mma.authenticate_request(ro)
-
-	# mma.session.stream=True
-
-	# resp = mma.send(ro)
-
-	# mma.download_to_tmp(resp, 'mm-perform-data')
-	# print("Done")
-
-	# from pprint import pprint as pp
-	# pp(resp.text)
-
-	# print("Auth:", mma.has_auth())
-
+	logging.basicConfig(stream=sys.stdout, filename="dev-debug.log", level=logging.DEBUG) ## for local debugging
