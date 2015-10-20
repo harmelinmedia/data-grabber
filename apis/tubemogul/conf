@@ -6,7 +6,7 @@
 	},
 	"urls": {
 		"base": "https://api.tubemogul.com",
-		"auth": "$BASE/oauth/token",
+		"auth": "http://api.tubemogul.com/oauth/token",
 		"reports": "$BASE/v1",
 		"trafficking": "$REPORTS/trafficking",
 		"test": "$TRAFFICKING/campaigns?limit=1&offset=0"
