@@ -1,0 +1,115 @@
+{
+  "Description": "Special index metrics for comparing your site visitors to 3rd party segments.  Broken out by audience name and pixel.  Currently available in one interval: last 14 days.",
+  "Name": "Audience Index Pixel Report",
+  "Type": "Standard",
+  "URI_Data": "https://api.mediamath.com/reporting/v1/std/audience_index_pixel",
+  "URI_Meta": "https://api.mediamath.com/reporting/v1/std/audience_index_pixel/meta",
+  "structure": {
+    "dimensions": {
+      "advertiser_id": {
+        "access": true,
+        "name": "Advertiser ID",
+        "type": "id"
+      },
+      "advertiser_name": {
+        "maxLength": 128,
+        "name": "Advertiser Name",
+        "type": "string"
+      },
+      "agency_id": {
+        "access": true,
+        "name": "Agency ID",
+        "type": "id"
+      },
+      "agency_name": {
+        "maxLength": 128,
+        "name": "Agency Name",
+        "type": "string"
+      },
+      "audience_id": {
+        "name": "Audience ID",
+        "type": "id"
+      },
+      "audience_name": {
+        "maxLength": 128,
+        "name": "Audience Name",
+        "type": "string"
+      },
+      "audience_path": {
+        "maxLength": 255,
+        "name": "Audience Path",
+        "type": "string"
+      },
+      "organization_id": {
+        "access": true,
+        "name": "Organization ID",
+        "type": "id"
+      },
+      "organization_name": {
+        "maxLength": 128,
+        "name": "Organization Name",
+        "type": "string"
+      },
+      "pixel_external_id": {
+        "maxLength": 30,
+        "name": "Pixel External ID",
+        "type": "string"
+      },
+      "pixel_id": {
+        "name": "Pixel ID",
+        "type": "id"
+      },
+      "pixel_name": {
+        "maxLength": 64,
+        "name": "Pixel Name",
+        "type": "string"
+      },
+      "pixel_tag_type": {
+        "name": "Pixel Tag Type",
+        "type": "string",
+        "values": [
+          "js",
+          "dfa",
+          "uat",
+          "image",
+          "iframe"
+        ]
+      },
+      "pixel_type": {
+        "name": "Pixel Type",
+        "type": "string",
+        "values": [
+          "data",
+          "dynamic",
+          "segment",
+          "event"
+        ]
+      }
+    },
+    "metrics": {
+      "audience_index": {
+        "description": "Measure of users exposed to your site/media against general internet population",
+        "name": "Audience Index",
+        "type": "ratio"
+      },
+      "matched_users": {
+        "name": "Matched Users",
+        "type": "count"
+      }
+    },
+    "time_field": {
+      "interval": {
+        "name": "Interval",
+        "type": "interval"
+      }
+    }
+  },
+  "time_aggregation": "various",
+  "time_rollups": [
+    "all"
+  ],
+  "time_windows": [
+    "last_14_days"
+  ],
+  "timezone": "UTC"
+}

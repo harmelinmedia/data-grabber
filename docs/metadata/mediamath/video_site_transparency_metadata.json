@@ -1,0 +1,399 @@
+{
+  "Description": "Video-specific metrics such as completion rate, skips, and fullscreens broken out by the domain of the inventory.  Available in standard intervals.",
+  "Name": "Video Site Transparency Report",
+  "Type": "Standard",
+  "URI_Data": "https://api.mediamath.com/reporting/v1/std/video_site_transparency",
+  "URI_Meta": "https://api.mediamath.com/reporting/v1/std/video_site_transparency/meta",
+  "currency": "USD",
+  "data_retention": "last_90_days",
+  "structure": {
+    "dimensions": {
+      "advertiser_id": {
+        "access": true,
+        "name": "Advertiser ID",
+        "type": "id"
+      },
+      "advertiser_name": {
+        "maxLength": 64,
+        "name": "Advertiser Name",
+        "type": "string"
+      },
+      "agency_id": {
+        "access": true,
+        "name": "Agency ID",
+        "type": "id"
+      },
+      "agency_name": {
+        "maxLength": 64,
+        "name": "Agency Name",
+        "type": "string"
+      },
+      "campaign_budget": {
+        "name": "Campaign Budget",
+        "type": "money"
+      },
+      "campaign_currency_code": {
+        "name": "Campaign Currency Code",
+        "type": "string"
+      },
+      "campaign_end_date": {
+        "name": "Campaign End Date",
+        "type": "datetime"
+      },
+      "campaign_goal_type": {
+        "name": "Campaign Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "campaign_goal_value": {
+        "name": "Campaign Goal Value",
+        "type": "money"
+      },
+      "campaign_id": {
+        "access": true,
+        "name": "Campaign ID",
+        "type": "id"
+      },
+      "campaign_initial_start_date": {
+        "name": "Campaign Initial Start Date",
+        "type": "datetime"
+      },
+      "campaign_name": {
+        "maxLength": 256,
+        "name": "Campaign Name",
+        "type": "string"
+      },
+      "campaign_start_date": {
+        "name": "Campaign Start Date",
+        "type": "datetime"
+      },
+      "campaign_timezone": {
+        "name": "Campaign Time Zone",
+        "type": "string"
+      },
+      "campaign_timezone_code": {
+        "name": "Campaign Time Zone Code",
+        "type": "string"
+      },
+      "exchange_id": {
+        "name": "Exchange ID",
+        "type": "id"
+      },
+      "exchange_name": {
+        "maxLength": 20,
+        "name": "Exchange Name",
+        "type": "string"
+      },
+      "organization_id": {
+        "access": true,
+        "name": "Organization ID",
+        "type": "id"
+      },
+      "organization_name": {
+        "maxLength": 64,
+        "name": "Organization Name",
+        "type": "string"
+      },
+      "site_domain": {
+        "maxLength": 256,
+        "name": "Site Domain",
+        "type": "string"
+      },
+      "strategy_budget": {
+        "name": "Strategy Budget",
+        "type": "money"
+      },
+      "strategy_channel": {
+        "name": "Strategy Channel",
+        "type": "string",
+        "values": [
+          "DISPLAY",
+          "VIDEO"
+        ]
+      },
+      "strategy_end_date": {
+        "name": "Strategy End Date",
+        "type": "datetime"
+      },
+      "strategy_goal_type": {
+        "name": "Strategy Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "strategy_goal_value": {
+        "name": "Strategy Goal Value",
+        "type": "money"
+      },
+      "strategy_id": {
+        "access": true,
+        "name": "Strategy ID",
+        "type": "id"
+      },
+      "strategy_name": {
+        "maxLength": 64,
+        "name": "Strategy Name",
+        "type": "string"
+      },
+      "strategy_start_date": {
+        "name": "Strategy Start Date",
+        "type": "datetime"
+      },
+      "strategy_type": {
+        "maxLength": 64,
+        "name": "Strategy Type",
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "clicks": {
+        "name": "Clicks",
+        "type": "count"
+      },
+      "ctc": {
+        "name": "CTC",
+        "type": "percent"
+      },
+      "ctr": {
+        "name": "CTR",
+        "type": "percent"
+      },
+      "impressions": {
+        "name": "Impressions",
+        "type": "count"
+      },
+      "media_cost": {
+        "name": "Media Cost",
+        "type": "money"
+      },
+      "media_cost_cpa": {
+        "name": "Media Cost eCPA",
+        "type": "money"
+      },
+      "media_cost_cpc": {
+        "name": "Media Cost eCPC",
+        "type": "money"
+      },
+      "media_cost_cpm": {
+        "name": "Media Cost eCPM",
+        "type": "money"
+      },
+      "media_cost_pc_cpa": {
+        "name": "Media Cost PC CPA",
+        "type": "money"
+      },
+      "media_cost_pv_cpa": {
+        "name": "Media Cost PV CPA",
+        "type": "money"
+      },
+      "post_click_conversions": {
+        "name": "Post-Click Conversions",
+        "type": "count"
+      },
+      "post_view_conversions": {
+        "name": "Post-View Conversions",
+        "type": "float"
+      },
+      "rr_per_1k_imps": {
+        "name": "Response Rate/1K Imps",
+        "type": "percent"
+      },
+      "total_ad_cost": {
+        "name": "Total Ad Cost",
+        "type": "money"
+      },
+      "total_ad_cost_cpa": {
+        "name": "Total Ad Cost eCPA",
+        "type": "money"
+      },
+      "total_ad_cost_cpc": {
+        "name": "Total Ad Cost eCPC",
+        "type": "money"
+      },
+      "total_ad_cost_cpm": {
+        "name": "Total Ad Cost eCPM",
+        "type": "money"
+      },
+      "total_ad_cost_pc_cpa": {
+        "name": "Total Ad Cost PC CPA",
+        "type": "money"
+      },
+      "total_ad_cost_pv_cpa": {
+        "name": "Total Ad Cost PV CPA",
+        "type": "money"
+      },
+      "total_conversions": {
+        "name": "Total Conversions",
+        "type": "float"
+      },
+      "total_spend": {
+        "name": "Total Spend",
+        "type": "money"
+      },
+      "total_spend_cpa": {
+        "name": "Total Spend eCPA",
+        "type": "money"
+      },
+      "total_spend_cpc": {
+        "name": "Total Spend eCPC",
+        "type": "money"
+      },
+      "total_spend_cpm": {
+        "name": "Total Spend eCPM",
+        "type": "money"
+      },
+      "total_spend_pc_cpa": {
+        "name": "Total Spend PC CPA",
+        "type": "money"
+      },
+      "total_spend_pv_cpa": {
+        "name": "Total Spend PV CPA",
+        "type": "money"
+      },
+      "video_close": {
+        "name": "Close",
+        "type": "count"
+      },
+      "video_collapse": {
+        "name": "Collapse",
+        "type": "count"
+      },
+      "video_companion_clicks": {
+        "name": "Companion Clicks",
+        "type": "count"
+      },
+      "video_companion_ctr": {
+        "name": "Companion CTR",
+        "type": "percent"
+      },
+      "video_companion_impressions": {
+        "name": "Companion Impressions",
+        "type": "count"
+      },
+      "video_complete": {
+        "name": "100% Completed Views",
+        "type": "count"
+      },
+      "video_complete_rate": {
+        "name": "100% Completed Rate",
+        "type": "percent"
+      },
+      "video_engaged_impressions": {
+        "name": "Engaged Impressions",
+        "type": "count"
+      },
+      "video_engaged_rate": {
+        "name": "Engaged Rate",
+        "type": "percent"
+      },
+      "video_expand": {
+        "name": "Expand",
+        "type": "count"
+      },
+      "video_first_quartile": {
+        "name": "25% Completed Views",
+        "type": "count"
+      },
+      "video_first_quartile_rate": {
+        "name": "25% Completed Rate",
+        "type": "percent"
+      },
+      "video_fullscreen": {
+        "name": "Fullscreen",
+        "type": "count"
+      },
+      "video_midpoint": {
+        "name": "50% Completed Views",
+        "type": "count"
+      },
+      "video_midpoint_rate": {
+        "name": "50% Completed Rate",
+        "type": "percent"
+      },
+      "video_mute": {
+        "name": "Mute",
+        "type": "count"
+      },
+      "video_pause": {
+        "name": "Pause",
+        "type": "count"
+      },
+      "video_play_rate": {
+        "name": "Play Rate",
+        "type": "percent"
+      },
+      "video_resume": {
+        "name": "Resume",
+        "type": "count"
+      },
+      "video_rewind": {
+        "name": "Rewind",
+        "type": "count"
+      },
+      "video_skip": {
+        "name": "Skip",
+        "type": "count"
+      },
+      "video_skippable_impressions": {
+        "name": "Skippable Impressions",
+        "type": "count"
+      },
+      "video_skipped_impressions": {
+        "name": "Skipped Impressions",
+        "type": "count"
+      },
+      "video_skipped_rate": {
+        "name": "Skipped Rate",
+        "type": "percent"
+      },
+      "video_start": {
+        "name": "Start",
+        "type": "count"
+      },
+      "video_third_quartile": {
+        "name": "75% Completed Views",
+        "type": "count"
+      },
+      "video_third_quartile_rate": {
+        "name": "75% Completed Rate",
+        "type": "percent"
+      },
+      "video_unmute": {
+        "name": "Unmute",
+        "type": "count"
+      }
+    },
+    "time_field": {
+      "date": {
+        "name": "Date",
+        "type": "datetime"
+      }
+    }
+  },
+  "time_aggregation": "by_day",
+  "time_rollups": [
+    "by_day",
+    "by_week",
+    "by_month",
+    "all"
+  ],
+  "time_windows": [
+    "yesterday",
+    "last_X_days",
+    "month_to_date"
+  ],
+  "timezone": "campaign timezone"
+}

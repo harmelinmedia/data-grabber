@@ -1,0 +1,336 @@
+{
+  "Description": "Standard performance metrics broken out by time of day and day of week. Available in standard intervals.",
+  "Name": "Day Part Report",
+  "Type": "Standard",
+  "URI_Data": "https://api.mediamath.com/reporting/v1/std/day_part",
+  "URI_Meta": "https://api.mediamath.com/reporting/v1/std/day_part/meta",
+  "currency": "USD",
+  "structure": {
+    "dimensions": {
+      "advertiser_id": {
+        "access": true,
+        "name": "Advertiser ID",
+        "type": "id"
+      },
+      "advertiser_name": {
+        "maxLength": 64,
+        "name": "Advertiser Name",
+        "type": "string"
+      },
+      "agency_id": {
+        "access": true,
+        "name": "Agency ID",
+        "type": "id"
+      },
+      "agency_name": {
+        "maxLength": 64,
+        "name": "Agency Name",
+        "type": "string"
+      },
+      "campaign_budget": {
+        "name": "Campaign Budget",
+        "type": "money"
+      },
+      "campaign_currency_code": {
+        "name": "Campaign Currency Code",
+        "type": "string"
+      },
+      "campaign_end_date": {
+        "name": "Campaign End Date",
+        "type": "datetime"
+      },
+      "campaign_goal_type": {
+        "name": "Campaign Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "campaign_goal_value": {
+        "name": "Campaign Goal Value",
+        "type": "money"
+      },
+      "campaign_id": {
+        "access": true,
+        "name": "Campaign ID",
+        "type": "id"
+      },
+      "campaign_initial_start_date": {
+        "name": "Campaign Initial Start Date",
+        "type": "datetime"
+      },
+      "campaign_name": {
+        "maxLength": 256,
+        "name": "Campaign Name",
+        "type": "string"
+      },
+      "campaign_start_date": {
+        "name": "Campaign Start Date",
+        "type": "datetime"
+      },
+      "campaign_timezone": {
+        "name": "Campaign Time Zone",
+        "type": "string"
+      },
+      "campaign_timezone_code": {
+        "name": "Campaign Time Zone Code",
+        "type": "string"
+      },
+      "day_part_id": {
+        "description": "value 1 corresponds to day_part_name value 'Morning Commute (6am-9am)' and so on",
+        "name": "Day Part ID",
+        "type": "id",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      "day_part_name": {
+        "maxLength": 50,
+        "name": "Day Part in the User's Timezone",
+        "type": "string",
+        "values": [
+          "Morning Commute (6am-9am)",
+          "Mid-Morning (9-11:30)",
+          "Lunch (11:30-1:30)",
+          "Mid-Afternoon (1:30-4:30)",
+          "Evening Commute (4:30-7pm)",
+          "Night (7pm-11pm)",
+          "Late Night (11pm-2am)",
+          "Overnight (2am-6am)"
+        ]
+      },
+      "exchange_id": {
+        "name": "Exchange ID",
+        "type": "id"
+      },
+      "exchange_name": {
+        "maxLength": 20,
+        "name": "Exchange Name",
+        "type": "string"
+      },
+      "organization_id": {
+        "access": true,
+        "name": "Organization ID",
+        "type": "id"
+      },
+      "organization_name": {
+        "maxLength": 64,
+        "name": "Organization Name",
+        "type": "string"
+      },
+      "strategy_budget": {
+        "name": "Strategy Budget",
+        "type": "money"
+      },
+      "strategy_channel": {
+        "name": "Strategy Channel",
+        "type": "string",
+        "values": [
+          "DISPLAY",
+          "VIDEO"
+        ]
+      },
+      "strategy_end_date": {
+        "name": "Strategy End Date",
+        "type": "datetime"
+      },
+      "strategy_goal_type": {
+        "name": "Strategy Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "strategy_goal_value": {
+        "name": "Strategy Goal Value",
+        "type": "money"
+      },
+      "strategy_id": {
+        "access": true,
+        "name": "Strategy ID",
+        "type": "id"
+      },
+      "strategy_name": {
+        "maxLength": 64,
+        "name": "Strategy Name",
+        "type": "string"
+      },
+      "strategy_start_date": {
+        "name": "Strategy Start Date",
+        "type": "datetime"
+      },
+      "strategy_type": {
+        "maxLength": 64,
+        "name": "Strategy Type",
+        "type": "string"
+      },
+      "weekday_id": {
+        "description": "value 1 corresponds to Sunday",
+        "name": "Weekday ID",
+        "type": "id",
+        "values": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "weekday_name": {
+        "name": "Weekday Name",
+        "type": "string",
+        "values": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ]
+      }
+    },
+    "metrics": {
+      "clicks": {
+        "name": "Clicks",
+        "type": "count"
+      },
+      "ctc": {
+        "name": "CTC",
+        "type": "percent"
+      },
+      "ctr": {
+        "name": "CTR",
+        "type": "percent"
+      },
+      "impressions": {
+        "name": "Impressions",
+        "type": "count"
+      },
+      "media_cost": {
+        "name": "Media Cost",
+        "type": "money"
+      },
+      "media_cost_cpa": {
+        "name": "Media Cost eCPA",
+        "type": "money"
+      },
+      "media_cost_cpc": {
+        "name": "Media Cost eCPC",
+        "type": "money"
+      },
+      "media_cost_cpm": {
+        "name": "Media Cost eCPM",
+        "type": "money"
+      },
+      "media_cost_pc_cpa": {
+        "name": "Media Cost PC CPA",
+        "type": "money"
+      },
+      "media_cost_pv_cpa": {
+        "name": "Media Cost PV CPA",
+        "type": "money"
+      },
+      "post_click_conversions": {
+        "name": "Post-Click Conversions",
+        "type": "count"
+      },
+      "post_view_conversions": {
+        "name": "Post-View Conversions",
+        "type": "float"
+      },
+      "rr_per_1k_imps": {
+        "name": "Response Rate/1K Imps",
+        "type": "percent"
+      },
+      "total_ad_cost": {
+        "name": "Total Ad Cost",
+        "type": "money"
+      },
+      "total_ad_cost_cpa": {
+        "name": "Total Ad Cost eCPA",
+        "type": "money"
+      },
+      "total_ad_cost_cpc": {
+        "name": "Total Ad Cost eCPC",
+        "type": "money"
+      },
+      "total_ad_cost_cpm": {
+        "name": "Total Ad Cost eCPM",
+        "type": "money"
+      },
+      "total_ad_cost_pc_cpa": {
+        "name": "Total Ad Cost PC CPA",
+        "type": "money"
+      },
+      "total_ad_cost_pv_cpa": {
+        "name": "Total Ad Cost PV CPA",
+        "type": "money"
+      },
+      "total_conversions": {
+        "name": "Total Conversions",
+        "type": "float"
+      },
+      "total_spend": {
+        "name": "Total Spend",
+        "type": "money"
+      },
+      "total_spend_cpa": {
+        "name": "Total Spend eCPA",
+        "type": "money"
+      },
+      "total_spend_cpc": {
+        "name": "Total Spend eCPC",
+        "type": "money"
+      },
+      "total_spend_cpm": {
+        "name": "Total Spend eCPM",
+        "type": "money"
+      },
+      "total_spend_pc_cpa": {
+        "name": "Total Spend PC CPA",
+        "type": "money"
+      },
+      "total_spend_pv_cpa": {
+        "name": "Total Spend PV CPA",
+        "type": "money"
+      }
+    },
+    "time_field": {
+      "interval": {
+        "name": "Interval",
+        "type": "interval"
+      }
+    }
+  },
+  "time_aggregation": "various",
+  "time_rollups": [
+    "all"
+  ],
+  "time_windows": [
+    "yesterday",
+    "last_7_days",
+    "last_30_days",
+    "campaign_to_date"
+  ],
+  "timezone": "campaign timezone"
+}
