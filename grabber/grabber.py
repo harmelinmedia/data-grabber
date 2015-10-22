@@ -203,7 +203,7 @@ class Grabber(object):
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
 	
-	def request(self, url, method="get", headers=None, params=None, data=None, stream=True, *urlargs):
+	def request(self, url, method="get", headers=None, params=None, data=None, stream=False, *urlargs):
 		"""Wrapper method to make an authenticated request in a single function call"""
 		ro = requests.Request(method=method, url=self.fill_url(url, *urlargs), params=params, data=data)
 		self.session.stream = stream
@@ -260,14 +260,13 @@ class Grabber(object):
 		try:
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
-		except (FileNotFoundError, GrabberAuthBadAuthFile):
+		except (FileNotFoundError, GrabberAuthBadAuthFile, json.decoder.JSONDecodeError):
 			self.refresh_auth_data()
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
 
 	def parse_credentials(self, fp):
-		"""returns API credentials as dictionary"""
-		raise NotImplementedError
+		return json.load(fp)
 	
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -324,9 +323,6 @@ class TubeMogulGrabber(Grabber):
 
 
 class MediaMathGrabber(Grabber):
-
-	def parse_credentials(self, fp):
-		return json.load(fp)
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -438,8 +434,10 @@ class GoogleGrabber(Grabber):
 			else:
 				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
+
 class DCMGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/dfareporting']
+
 
 class GoogleAnalyticsGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -451,9 +449,6 @@ class PointrollGrabber(Grabber):
 		'content-type':'application/json; charset=utf-8',
 		'accept':'application/json; charset=utf-8'
 		}
-
-	def parse_credentials(self):
-		return json.load(fp)
 	
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -463,14 +458,11 @@ class PointrollGrabber(Grabber):
 		ro.headers["token"] = token
 		return ro
 
-	def parse_auth_data(self):
+	def parse_auth_data(self, fp):
 		# FIX THIS TOO
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as tk:
-			auth = json.load(tk)
-			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
-				return auth['token']
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+		auth = json.load(fp)	
+		return auth['token']		
 
 	def refresh_auth_data(self):
 		# ALSO FIX THIS
@@ -478,7 +470,7 @@ class PointrollGrabber(Grabber):
 		logging.debug("Renewing authorization")
 		response = self.session.post( self.urls.auth, params=self.credentials, headers=self.default_headers)
 		if response.status_code == requests.codes.ok:
-			self.save_auth_to_file(response.headers)
+			self.save_auth_to_file(json.dumps(dict(response.headers)))
 		else:
 			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 		
