@@ -1,0 +1,294 @@
+[
+  {
+    "metricID": 12,
+    "metricName": "Action Rate"
+  },
+  {
+    "metricID": 14,
+    "metricName": "Avg Brand Interaction Time (Seconds)"
+  },
+  {
+    "metricID": 28,
+    "metricName": "Avg NonUI Panel Display Time"
+  },
+  {
+    "metricID": 16,
+    "metricName": "Avg Page Time (Seconds)"
+  },
+  {
+    "metricID": 29,
+    "metricName": "Avg Panel Display Time"
+  },
+  {
+    "metricID": 13,
+    "metricName": "Avg Panels per Interaction"
+  },
+  {
+    "metricID": 27,
+    "metricName": "Avg UI Panel Display Time"
+  },
+  {
+    "metricID": 230,
+    "metricName": "Avg View Time (Display-Geometric)"
+  },
+  {
+    "metricID": 133,
+    "metricName": "Banner Activities"
+  },
+  {
+    "metricID": 136,
+    "metricName": "Banner Activity Details"
+  },
+  {
+    "metricID": 135,
+    "metricName": "Banner Activity Rate"
+  },
+  {
+    "metricID": 137,
+    "metricName": "Banner Click Details"
+  },
+  {
+    "metricID": 3,
+    "metricName": "Banner Clicks**"
+  },
+  {
+    "metricID": 5,
+    "metricName": "Banner CTR"
+  },
+  {
+    "metricID": 134,
+    "metricName": "Banners with Activity"
+  },
+  {
+    "metricID": 234,
+    "metricName": "Expansion Rate"
+  },
+  {
+    "metricID": 235,
+    "metricName": "Expansions"
+  },
+  {
+    "metricID": 1,
+    "metricName": "Impressions**"
+  },
+  {
+    "metricID": 10,
+    "metricName": "Interaction Rate"
+  },
+  {
+    "metricID": 9,
+    "metricName": "Interactions"
+  },
+  {
+    "metricID": 11,
+    "metricName": "Interactions with Action"
+  },
+  {
+    "metricID": 158,
+    "metricName": "Non-Rich Media Impressions**"
+  },
+  {
+    "metricID": 31,
+    "metricName": "NonUI Panel Activities"
+  },
+  {
+    "metricID": 37,
+    "metricName": "NonUI Panel Activity Rate"
+  },
+  {
+    "metricID": 22,
+    "metricName": "NonUI Panel Clicks**"
+  },
+  {
+    "metricID": 25,
+    "metricName": "NonUI Panel CTR"
+  },
+  {
+    "metricID": 19,
+    "metricName": "NonUI Panel Impressions"
+  },
+  {
+    "metricID": 34,
+    "metricName": "NonUI Panels with Activity"
+  },
+  {
+    "metricID": 32,
+    "metricName": "Panel Activities"
+  },
+  {
+    "metricID": 39,
+    "metricName": "Panel Activity Details (1 per item)"
+  },
+  {
+    "metricID": 38,
+    "metricName": "Panel Activity Rate"
+  },
+  {
+    "metricID": 8,
+    "metricName": "Panel Click Details"
+  },
+  {
+    "metricID": 23,
+    "metricName": "Panel Clicks"
+  },
+  {
+    "metricID": 26,
+    "metricName": "Panel CTR"
+  },
+  {
+    "metricID": 20,
+    "metricName": "Panel Impressions"
+  },
+  {
+    "metricID": 35,
+    "metricName": "Panels with Activity"
+  },
+  {
+    "metricID": 254,
+    "metricName": "Player Operation Details"
+  },
+  {
+    "metricID": 245,
+    "metricName": "Reporting API AdControlDCO"
+  },
+  {
+    "metricID": 244,
+    "metricName": "Reporting API Banner Videos Details"
+  },
+  {
+    "metricID": 241,
+    "metricName": "Reporting API Fact Data Details"
+  },
+  {
+    "metricID": 243,
+    "metricName": "Reporting API Panel Videos Details"
+  },
+  {
+    "metricID": 242,
+    "metricName": "Reporting API Site Events Details"
+  },
+  {
+    "metricID": 205,
+    "metricName": "Rich Media Backup Impressions**"
+  },
+  {
+    "metricID": 157,
+    "metricName": "Rich Media Impressions**"
+  },
+  {
+    "metricID": 15,
+    "metricName": "Total Brand Interaction Time (Hours)"
+  },
+  {
+    "metricID": 4,
+    "metricName": "Total Clicks**"
+  },
+  {
+    "metricID": 6,
+    "metricName": "Total CTR"
+  },
+  {
+    "metricID": 299,
+    "metricName": "Total Video 100% Completion Count (Unique)"
+  },
+  {
+    "metricID": 145,
+    "metricName": "Total Video 100% Completion Count**"
+  },
+  {
+    "metricID": 303,
+    "metricName": "Total Video 100% Completion Rate (Unique)"
+  },
+  {
+    "metricID": 149,
+    "metricName": "Total Video 100% Completion Rate**"
+  },
+  {
+    "metricID": 296,
+    "metricName": "Total Video 25% Completion Count (Unique)"
+  },
+  {
+    "metricID": 142,
+    "metricName": "Total Video 25% Completion Count**"
+  },
+  {
+    "metricID": 300,
+    "metricName": "Total Video 25% Completion Rate (Unique)"
+  },
+  {
+    "metricID": 146,
+    "metricName": "Total Video 25% Completion Rate**"
+  },
+  {
+    "metricID": 297,
+    "metricName": "Total Video 50% Completion Count (Unique)"
+  },
+  {
+    "metricID": 143,
+    "metricName": "Total Video 50% Completion Count**"
+  },
+  {
+    "metricID": 301,
+    "metricName": "Total Video 50% Completion Rate (Unique)"
+  },
+  {
+    "metricID": 147,
+    "metricName": "Total Video 50% Completion Rate**"
+  },
+  {
+    "metricID": 298,
+    "metricName": "Total Video 75% Completion Count (Unique)"
+  },
+  {
+    "metricID": 144,
+    "metricName": "Total Video 75% Completion Count**"
+  },
+  {
+    "metricID": 302,
+    "metricName": "Total Video 75% Completion Rate (Unique)"
+  },
+  {
+    "metricID": 148,
+    "metricName": "Total Video 75% Completion Rate**"
+  },
+  {
+    "metricID": 295,
+    "metricName": "Total Video Starts (Unique)"
+  },
+  {
+    "metricID": 140,
+    "metricName": "Total Video Starts**"
+  },
+  {
+    "metricID": 30,
+    "metricName": "UI Panel Activities"
+  },
+  {
+    "metricID": 36,
+    "metricName": "UI Panel Activity Rate"
+  },
+  {
+    "metricID": 21,
+    "metricName": "UI Panel Clicks**"
+  },
+  {
+    "metricID": 24,
+    "metricName": "UI Panel CTR"
+  },
+  {
+    "metricID": 18,
+    "metricName": "UI Panel Impressions"
+  },
+  {
+    "metricID": 33,
+    "metricName": "UI Panels with Activity"
+  },
+  {
+    "metricID": 231,
+    "metricName": "Viewable Impressions (Display-Geometric)"
+  },
+  {
+    "metricID": 232,
+    "metricName": "Viewable Rate (Display-Geometric)"
+  }
+]

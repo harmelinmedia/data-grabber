@@ -441,16 +441,19 @@ class GoogleAnalyticsGrabber(GoogleGrabber):
 
 class PointrollGrabber(Grabber):
 
-	def default_headers(self):
-		return {
-		'Content-Type':'application/json; charset=utf-8',
-		'Accept':'application/json; charset=utf-8',
-		"Scope_AgencyID" : str(self.agency_id),
-		"Scope_AdvertiserID" : "",
-		"Scope_CampaignID" : "",
-		"Scope_PublisherID" : "",
-		"Scope_SubPublisherID" : ""
+	def default_headers(self, **kwargs):
+		headers = {
+			'Content-Type':'application/json; charset=utf-8',
+			'Accept':'application/json; charset=utf-8',
+			"Scope_AgencyID" : str(self.agency_id),
+			"Scope_AdvertiserID" : "",
+			"Scope_CampaignID" : "",
+			"Scope_PublisherID" : "",
+			"Scope_SubPublisherID" : ""
 		}
+		for arg, val in kwargs.items():
+			headers[arg] = val
+		return headers
 
 	def test_auth(self, *urlargs ):
 		return super().test_auth(headers=self.default_headers(), *urlargs)

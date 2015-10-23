@@ -1,0 +1,298 @@
+[
+  {
+    "advertiserID": 12,
+    "advertiserName": "PointRoll Test"
+  },
+  {
+    "advertiserID": 76,
+    "advertiserName": "Ford"
+  },
+  {
+    "advertiserID": 568,
+    "advertiserName": "Comcast"
+  },
+  {
+    "advertiserID": 1757,
+    "advertiserName": "Wilmington Trust"
+  },
+  {
+    "advertiserID": 1767,
+    "advertiserName": "Aetna"
+  },
+  {
+    "advertiserID": 1782,
+    "advertiserName": "MTV"
+  },
+  {
+    "advertiserID": 1883,
+    "advertiserName": "Scotties"
+  },
+  {
+    "advertiserID": 2056,
+    "advertiserName": "Black Entertainment Television"
+  },
+  {
+    "advertiserID": 2873,
+    "advertiserName": "Bimbo Bakeries"
+  },
+  {
+    "advertiserID": 3092,
+    "advertiserName": "TV Land"
+  },
+  {
+    "advertiserID": 3480,
+    "advertiserName": "FDAF (Ford Dealers Advertising Fund)"
+  },
+  {
+    "advertiserID": 5211,
+    "advertiserName": "Sight and Sound Theatres"
+  },
+  {
+    "advertiserID": 5327,
+    "advertiserName": "Orlando Regional Healthcare"
+  },
+  {
+    "advertiserID": 5382,
+    "advertiserName": "EP Henry"
+  },
+  {
+    "advertiserID": 5411,
+    "advertiserName": "Penta Water Company"
+  },
+  {
+    "advertiserID": 5449,
+    "advertiserName": "Sheetz"
+  },
+  {
+    "advertiserID": 5493,
+    "advertiserName": "Beneficial Bank"
+  },
+  {
+    "advertiserID": 5539,
+    "advertiserName": "USA 3000"
+  },
+  {
+    "advertiserID": 5553,
+    "advertiserName": "New Jersey Motorsports Park"
+  },
+  {
+    "advertiserID": 5601,
+    "advertiserName": "Fox Chase Cancer Center"
+  },
+  {
+    "advertiserID": 5872,
+    "advertiserName": "amResorts"
+  },
+  {
+    "advertiserID": 5917,
+    "advertiserName": "SunGard"
+  },
+  {
+    "advertiserID": 5994,
+    "advertiserName": "John Templeton Foundation"
+  },
+  {
+    "advertiserID": 5999,
+    "advertiserName": "International Spy Museum"
+  },
+  {
+    "advertiserID": 6008,
+    "advertiserName": "Herschend Family Entertainment"
+  },
+  {
+    "advertiserID": 6106,
+    "advertiserName": "South Jersey Healthcare"
+  },
+  {
+    "advertiserID": 6167,
+    "advertiserName": "Project Management Institute"
+  },
+  {
+    "advertiserID": 6195,
+    "advertiserName": "Post Foods"
+  },
+  {
+    "advertiserID": 6214,
+    "advertiserName": "Russian Standard Vodka"
+  },
+  {
+    "advertiserID": 6277,
+    "advertiserName": "Philadelphia Union"
+  },
+  {
+    "advertiserID": 6285,
+    "advertiserName": "Kerasotes ShowPlace Theatre"
+  },
+  {
+    "advertiserID": 6328,
+    "advertiserName": "Pennsylvania State University"
+  },
+  {
+    "advertiserID": 6414,
+    "advertiserName": "Tasty Baking Company"
+  },
+  {
+    "advertiserID": 6559,
+    "advertiserName": "OMRON Corporation"
+  },
+  {
+    "advertiserID": 6739,
+    "advertiserName": "Pennsylvania Liquor Control Board"
+  },
+  {
+    "advertiserID": 6770,
+    "advertiserName": "SEI"
+  },
+  {
+    "advertiserID": 6842,
+    "advertiserName": "Pennsylvania Department of Health"
+  },
+  {
+    "advertiserID": 6854,
+    "advertiserName": "Dex One Corporation"
+  },
+  {
+    "advertiserID": 6863,
+    "advertiserName": "Rothman Institute"
+  },
+  {
+    "advertiserID": 7019,
+    "advertiserName": "Philadelphia Gas Works"
+  },
+  {
+    "advertiserID": 7046,
+    "advertiserName": "Vertex Pharmaceuticals"
+  },
+  {
+    "advertiserID": 7092,
+    "advertiserName": "Montefiore Medical Center"
+  },
+  {
+    "advertiserID": 7347,
+    "advertiserName": "SEPTA"
+  },
+  {
+    "advertiserID": 7649,
+    "advertiserName": "Pet Armor"
+  },
+  {
+    "advertiserID": 7846,
+    "advertiserName": "CWOPA"
+  },
+  {
+    "advertiserID": 7995,
+    "advertiserName": "philly.com"
+  },
+  {
+    "advertiserID": 8042,
+    "advertiserName": "Blue Diamond"
+  },
+  {
+    "advertiserID": 8073,
+    "advertiserName": "PSECU"
+  },
+  {
+    "advertiserID": 8077,
+    "advertiserName": "LVHN"
+  },
+  {
+    "advertiserID": 8115,
+    "advertiserName": "Jefferson Hospital"
+  },
+  {
+    "advertiserID": 8119,
+    "advertiserName": "State of Pennsylvania"
+  },
+  {
+    "advertiserID": 8241,
+    "advertiserName": "Somerset Medical Center"
+  },
+  {
+    "advertiserID": 8323,
+    "advertiserName": "Turkey Hill"
+  },
+  {
+    "advertiserID": 8371,
+    "advertiserName": "Philadelphia Zoo"
+  },
+  {
+    "advertiserID": 8442,
+    "advertiserName": "Sinclair Broadcast Group"
+  },
+  {
+    "advertiserID": 8453,
+    "advertiserName": "Einstein Medical Center"
+  },
+  {
+    "advertiserID": 8482,
+    "advertiserName": "Universal Health Services"
+  },
+  {
+    "advertiserID": 8539,
+    "advertiserName": "Cumberland Packing Co"
+  },
+  {
+    "advertiserID": 8639,
+    "advertiserName": "PA Dutch"
+  },
+  {
+    "advertiserID": 8705,
+    "advertiserName": "Alexandria Convention and Visitors Association"
+  },
+  {
+    "advertiserID": 8752,
+    "advertiserName": "Main Line Health"
+  },
+  {
+    "advertiserID": 8964,
+    "advertiserName": "5 Below"
+  },
+  {
+    "advertiserID": 9128,
+    "advertiserName": "Royal Purple"
+  },
+  {
+    "advertiserID": 9209,
+    "advertiserName": "Inspira"
+  },
+  {
+    "advertiserID": 9316,
+    "advertiserName": "OraSure"
+  },
+  {
+    "advertiserID": 9732,
+    "advertiserName": "Reading Health Systems"
+  },
+  {
+    "advertiserID": 10718,
+    "advertiserName": "Boscovs"
+  },
+  {
+    "advertiserID": 11046,
+    "advertiserName": "La Salle University"
+  },
+  {
+    "advertiserID": 11148,
+    "advertiserName": "CBS-3"
+  },
+  {
+    "advertiserID": 11858,
+    "advertiserName": "Milk Splash"
+  },
+  {
+    "advertiserID": 12730,
+    "advertiserName": "St. Marys Medical Center"
+  },
+  {
+    "advertiserID": 13088,
+    "advertiserName": "Special Olympics PA"
+  },
+  {
+    "advertiserID": 13299,
+    "advertiserName": "Health Promotions Council"
+  },
+  {
+    "advertiserID": 13619,
+    "advertiserName": "Apex Tool Group"
+  }
+]

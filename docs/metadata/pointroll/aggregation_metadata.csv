@@ -1,0 +1,50 @@
+[
+  {
+    "aggregationID": 2,
+    "aggregationName": "Advertiser"
+  },
+  {
+    "aggregationID": 3,
+    "aggregationName": "Campaign"
+  },
+  {
+    "aggregationID": 8,
+    "aggregationName": "Creative"
+  },
+  {
+    "aggregationID": 10,
+    "aggregationName": "Creative Size"
+  },
+  {
+    "aggregationID": 17,
+    "aggregationName": "Daily"
+  },
+  {
+    "aggregationID": 11,
+    "aggregationName": "Display Format"
+  },
+  {
+    "aggregationID": 15,
+    "aggregationName": "Monthly"
+  },
+  {
+    "aggregationID": 6,
+    "aggregationName": "Placement"
+  },
+  {
+    "aggregationID": 5,
+    "aggregationName": "Publisher"
+  },
+  {
+    "aggregationID": 2269,
+    "aggregationName": "Reporting API Adcontrol/DCO"
+  },
+  {
+    "aggregationID": 22,
+    "aggregationName": "Rich Media"
+  },
+  {
+    "aggregationID": 16,
+    "aggregationName": "Weekly"
+  }
+]
