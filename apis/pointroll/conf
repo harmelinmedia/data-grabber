@@ -7,7 +7,7 @@
 	"urls": {
 		"base": "https://reportapi.pointroll.com",
 		"auth": "$BASE/user/login",
-		"test": "$META_METRIC",
+		"test": "$META_AGGREGATION",
 
 		"report":"$BASE/Report",
 		"runasync":"$REPORT/RunAsync",
@@ -20,5 +20,5 @@
 		"meta_aggregation":"$BASE/Aggregation/Get"
 
 	},
-	"advertiser_id":"76"
+	"agency_id" : "2528"
 }
