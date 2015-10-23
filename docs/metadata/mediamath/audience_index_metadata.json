@@ -1,0 +1,185 @@
+{
+  "Description": "Special index metrics for comparing your ads' viewers to 3rd party segments.  Broken out by audience name, as well as standard dimensions down to campaign and strategy.  Currently available in one interval: last 14 days.",
+  "Name": "Audience Index Report",
+  "Type": "Standard",
+  "URI_Data": "https://api.mediamath.com/reporting/v1/std/audience_index",
+  "URI_Meta": "https://api.mediamath.com/reporting/v1/std/audience_index/meta",
+  "structure": {
+    "dimensions": {
+      "advertiser_id": {
+        "access": true,
+        "name": "Advertiser ID",
+        "type": "id"
+      },
+      "advertiser_name": {
+        "maxLength": 64,
+        "name": "Advertiser Name",
+        "type": "string"
+      },
+      "agency_id": {
+        "access": true,
+        "name": "Agency ID",
+        "type": "id"
+      },
+      "agency_name": {
+        "maxLength": 64,
+        "name": "Agency Name",
+        "type": "string"
+      },
+      "audience_id": {
+        "name": "Audience ID",
+        "type": "id"
+      },
+      "audience_name": {
+        "maxLength": 128,
+        "name": "Audience Name",
+        "type": "string"
+      },
+      "audience_path": {
+        "maxLength": 255,
+        "name": "Audience Path",
+        "type": "string"
+      },
+      "campaign_budget": {
+        "name": "Campaign Budget",
+        "type": "money"
+      },
+      "campaign_currency_code": {
+        "name": "Campaign Currency Code",
+        "type": "string"
+      },
+      "campaign_end_date": {
+        "name": "Campaign End Date",
+        "type": "datetime"
+      },
+      "campaign_goal_type": {
+        "name": "Campaign Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "campaign_goal_value": {
+        "name": "Campaign Goal Value",
+        "type": "money"
+      },
+      "campaign_id": {
+        "access": true,
+        "name": "Campaign ID",
+        "type": "id"
+      },
+      "campaign_initial_start_date": {
+        "name": "Campaign Initial Start Date",
+        "type": "datetime"
+      },
+      "campaign_name": {
+        "maxLength": 256,
+        "name": "Campaign Name",
+        "type": "string"
+      },
+      "campaign_start_date": {
+        "name": "Campaign Start Date",
+        "type": "datetime"
+      },
+      "campaign_timezone": {
+        "name": "Campaign Time Zone",
+        "type": "string"
+      },
+      "campaign_timezone_code": {
+        "name": "Campaign Time Zone Code",
+        "type": "string"
+      },
+      "organization_id": {
+        "access": true,
+        "name": "Organization ID",
+        "type": "id"
+      },
+      "organization_name": {
+        "maxLength": 64,
+        "name": "Organization Name",
+        "type": "string"
+      },
+      "strategy_budget": {
+        "name": "Strategy Budget",
+        "type": "money"
+      },
+      "strategy_channel": {
+        "name": "Strategy Channel",
+        "type": "string",
+        "values": [
+          "DISPLAY",
+          "VIDEO"
+        ]
+      },
+      "strategy_end_date": {
+        "name": "Strategy End Date",
+        "type": "datetime"
+      },
+      "strategy_goal_type": {
+        "name": "Strategy Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "strategy_goal_value": {
+        "name": "Strategy Goal Value",
+        "type": "money"
+      },
+      "strategy_id": {
+        "access": true,
+        "name": "Strategy ID",
+        "type": "id"
+      },
+      "strategy_name": {
+        "maxLength": 64,
+        "name": "Strategy Name",
+        "type": "string"
+      },
+      "strategy_start_date": {
+        "name": "Strategy Start Date",
+        "type": "datetime"
+      },
+      "strategy_type": {
+        "maxLength": 64,
+        "name": "Strategy Type",
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "audience_index": {
+        "description": "Measure of users exposed to your site/media against general internet population",
+        "name": "Audience Index",
+        "type": "ratio"
+      },
+      "matched_impressions": {
+        "name": "Matched Impressions",
+        "type": "count"
+      }
+    },
+    "time_field": {
+      "interval": {
+        "name": "Interval",
+        "type": "interval"
+      }
+    }
+  },
+  "time_aggregation": "various",
+  "time_rollups": [
+    "all"
+  ],
+  "time_windows": [
+    "last_14_days"
+  ],
+  "timezone": "campaign timezone"
+}

@@ -9,7 +9,7 @@ from ..grabber.errors import *
 
 # for testing config files and init procedures
 api_path = "/Users/hank/Documents/Harmelin/Projects_Harmelin/datagrabber/apis/"
-for api in ["dcm","mediamath","tubemogul"]:
+for api in ["dcm","mediamath","tubemogul","pointroll"]:
 	exec( "%s_path = os.path.join(api_path, \"%s\", \"conf\")" % (api,api) )
 
 class TestGrabber:
@@ -63,6 +63,13 @@ class TestGrabber:
 
 	def test_dcm_auth(self):
 		g = DCMGrabber(dcm_path)
+		try:
+			assert g.authenticate()
+		except GrabberHTTPConnectionError:
+			assert 1
+
+	def test_pointroll_auth(self):
+		g = PointrollGrabber(pointroll_path)
 		try:
 			assert g.authenticate()
 		except GrabberHTTPConnectionError:

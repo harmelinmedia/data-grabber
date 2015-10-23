@@ -203,7 +203,7 @@ class Grabber(object):
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
 	
-	def request(self, url, method="get", headers=None, params=None, data=None, stream=True, *urlargs):
+	def request(self, url, method="get", headers=None, params=None, data=None, stream=False, *urlargs):
 		"""Wrapper method to make an authenticated request in a single function call"""
 		ro = requests.Request(method=method, url=self.fill_url(url, *urlargs), params=params, data=data)
 		self.session.stream = stream
@@ -213,7 +213,7 @@ class Grabber(object):
 		logging.debug('Authenticating...')
 		try:
 			test = self.test_auth()
-			if not test:
+			if test == False:
 				self.refresh_auth_data()
 				test = self.test_auth()
 			return test
@@ -223,11 +223,12 @@ class Grabber(object):
 	def fill_url(self, url, *args):
 		return url % args
 
-	def test_auth(self, *urlargs):
+	def test_auth(self, *urlargs, **requestargs):
 		logging.debug('Testing authentication...',)
 		ro = requests.Request(
 					method = 'GET',
-					url = self.fill_url( self.urls.test, *urlargs)
+					url = self.fill_url( self.urls.test, *urlargs),
+					**requestargs
 					)
 		resp = self.send(ro)
 		if resp.status_code == requests.codes.ok:
@@ -260,14 +261,13 @@ class Grabber(object):
 		try:
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
-		except (FileNotFoundError, GrabberAuthBadAuthFile):
+		except (FileNotFoundError, GrabberAuthBadAuthFile, json.decoder.JSONDecodeError, KeyError):
 			self.refresh_auth_data()
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
 
 	def parse_credentials(self, fp):
-		"""returns API credentials as dictionary"""
-		raise NotImplementedError
+		return json.load(fp)
 	
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -318,15 +318,10 @@ class TubeMogulGrabber(Grabber):
 			with open(self.token_file, 'w') as out:
 				json.dump(response_data, out)
 		else:
-			logging.debug(header)
-			logging.debug(response.text)
 			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
 
 class MediaMathGrabber(Grabber):
-
-	def parse_credentials(self, fp):
-		return json.load(fp)
 
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
@@ -438,8 +433,10 @@ class GoogleGrabber(Grabber):
 			else:
 				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
+
 class DCMGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/dfareporting']
+
 
 class GoogleAnalyticsGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -447,41 +444,45 @@ class GoogleAnalyticsGrabber(GoogleGrabber):
 
 class PointrollGrabber(Grabber):
 
-	default_headers = {
-		'content-type':'application/json; charset=utf-8',
-		'accept':'application/json; charset=utf-8'
+	def default_headers(self):
+		return {
+		'Content-Type':'application/json; charset=utf-8',
+		'Accept':'application/json; charset=utf-8',
+		"Scope_AgencyID" : str(self.agency_id),
+		"Scope_AdvertiserID" : "",
+		"Scope_CampaignID" : "",
+		"Scope_PublisherID" : "",
+		"Scope_SubPublisherID" : ""
 		}
 
-	def parse_credentials(self):
-		return json.load(fp)
-	
+	def test_auth(self, *urlargs ):
+		return super().test_auth(headers=self.default_headers(), *urlargs)
+
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
-		### FIX THIS
 		token = self.load_auth_from_file()
-		ro.headers = self.default_headers
+		ro.headers = self.default_headers()
 		ro.headers["token"] = token
 		return ro
 
-	def parse_auth_data(self):
-		# FIX THIS TOO
+	def parse_auth_data(self, fp):
 		"""Parses auth file, returns data, raises exception if unsuccessful"""
-		with open(self.token_file, 'r') as tk:
-			auth = json.load(tk)
-			if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=10):
-				return auth['token']
-			raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
+		auth = json.load(fp)
+		if datetime.strptime(auth['expires_at'], "%Y%m%d%H%M%S") - datetime.utcnow() > timedelta(minutes=30):
+			return auth['token']
+		raise GrabberAuthBadAuthFile("Authentication data could not be loaded. File was broken, expired, or did not exist.")
 
 	def refresh_auth_data(self):
-		# ALSO FIX THIS
 		"""Gets new authorization data from API, saves to file"""
 		logging.debug("Renewing authorization")
-		response = self.session.post( self.urls.auth, params=self.credentials, headers=self.default_headers)
+		response = self.session.post( self.urls.auth, params=self.credentials, headers=self.default_headers())
 		if response.status_code == requests.codes.ok:
-			self.save_auth_to_file(response.headers)
+			response_data = dict(response.headers)
+			response_data['expires_at'] = (datetime.utcnow() + timedelta(hours=12)).strftime("%Y%m%d%H%M%S")
+			self.save_auth_to_file(json.dumps(response_data))
 		else:
 			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
-		
+
 
 if __name__=="__main__":
 

@@ -1,0 +1,189 @@
+{
+  "Description": "Watermark metrics show how many impressions and how much spend went towards the brain's learning activities.  Viewable by campaign and strategy dimensions and available by day.",
+  "Name": "Watermark Report in US Dollars",
+  "Type": "Standard",
+  "URI_Data": "https://api.mediamath.com/reporting/v1/std/watermark",
+  "URI_Meta": "https://api.mediamath.com/reporting/v1/std/watermark/meta",
+  "currency": "USD",
+  "data_retention": "last_30_days",
+  "structure": {
+    "dimensions": {
+      "advertiser_id": {
+        "access": true,
+        "name": "Advertiser ID",
+        "type": "id"
+      },
+      "advertiser_name": {
+        "maxLength": 64,
+        "name": "Advertiser Name",
+        "type": "string"
+      },
+      "agency_id": {
+        "access": true,
+        "name": "Agency ID",
+        "type": "id"
+      },
+      "agency_name": {
+        "maxLength": 64,
+        "name": "Agency Name",
+        "type": "string"
+      },
+      "campaign_budget": {
+        "name": "Campaign Budget",
+        "type": "money"
+      },
+      "campaign_currency_code": {
+        "name": "Campaign Currency Code",
+        "type": "string"
+      },
+      "campaign_end_date": {
+        "name": "Campaign End Date",
+        "type": "datetime"
+      },
+      "campaign_goal_type": {
+        "name": "Campaign Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "campaign_goal_value": {
+        "name": "Campaign Goal Value",
+        "type": "money"
+      },
+      "campaign_id": {
+        "access": true,
+        "name": "Campaign ID",
+        "type": "id"
+      },
+      "campaign_initial_start_date": {
+        "name": "Campaign Initial Start Date",
+        "type": "datetime"
+      },
+      "campaign_name": {
+        "maxLength": 256,
+        "name": "Campaign Name",
+        "type": "string"
+      },
+      "campaign_start_date": {
+        "name": "Campaign Start Date",
+        "type": "datetime"
+      },
+      "campaign_timezone": {
+        "name": "Campaign Time Zone",
+        "type": "string"
+      },
+      "campaign_timezone_code": {
+        "name": "Campaign Time Zone Code",
+        "type": "string"
+      },
+      "organization_id": {
+        "access": true,
+        "name": "Organization ID",
+        "type": "id"
+      },
+      "organization_name": {
+        "maxLength": 64,
+        "name": "Organization Name",
+        "type": "string"
+      },
+      "strategy_budget": {
+        "name": "Strategy Budget",
+        "type": "money"
+      },
+      "strategy_channel": {
+        "name": "Strategy Channel",
+        "type": "string",
+        "values": [
+          "DISPLAY",
+          "VIDEO"
+        ]
+      },
+      "strategy_end_date": {
+        "name": "Strategy End Date",
+        "type": "datetime"
+      },
+      "strategy_goal_type": {
+        "name": "Strategy Goal Type",
+        "type": "string",
+        "values": [
+          "cpa",
+          "cpc",
+          "cpe",
+          "reach",
+          "spend",
+          "roi"
+        ]
+      },
+      "strategy_goal_value": {
+        "name": "Strategy Goal Value",
+        "type": "money"
+      },
+      "strategy_id": {
+        "access": true,
+        "name": "Strategy ID",
+        "type": "id"
+      },
+      "strategy_name": {
+        "maxLength": 64,
+        "name": "Strategy Name",
+        "type": "string"
+      },
+      "strategy_start_date": {
+        "name": "Strategy Start Date",
+        "type": "datetime"
+      },
+      "strategy_type": {
+        "maxLength": 64,
+        "name": "Strategy Type",
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "non_watermark_impressions": {
+        "name": "Non-Watermark Impressions",
+        "type": "count"
+      },
+      "non_watermark_spend": {
+        "name": "Non-Watermark Spend",
+        "type": "money"
+      },
+      "watermark_impressions": {
+        "name": "Watermark Impressions",
+        "type": "count"
+      },
+      "watermark_spend": {
+        "name": "Watermark Spend",
+        "type": "money"
+      },
+      "watermark_spend_pct": {
+        "name": "Watermark Spend Percent",
+        "type": "percent"
+      }
+    },
+    "time_field": {
+      "date": {
+        "name": "Date",
+        "type": "datetime"
+      }
+    }
+  },
+  "time_aggregation": "by_day",
+  "time_rollups": [
+    "by_day",
+    "by_week",
+    "by_month",
+    "all"
+  ],
+  "time_windows": [
+    "yesterday",
+    "last_X_days",
+    "month_to_date"
+  ],
+  "timezone": "UTC"
+}
