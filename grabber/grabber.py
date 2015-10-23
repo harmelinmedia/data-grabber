@@ -315,8 +315,7 @@ class TubeMogulGrabber(Grabber):
 		if response.status_code == requests.codes.ok:
 			response_data = json.loads(response.text)
 			response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
-			with open(self.token_file, 'w') as out:
-				json.dump(response_data, out)
+			self.save_auth_to_file(json.dumps(response_data))
 		else:
 			raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
@@ -394,8 +393,7 @@ class GoogleGrabber(Grabber):
 			if response.status_code == requests.codes.ok:
 				response_data = json.loads(response.text)
 				response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
-				with open(self.token_file, 'w') as out:
-					json.dump(response_data, out)
+				self.save_auth_to_file(json.dumps(response_data))
 			else:
 				raise GrabberAuthInvalidCredentials('Credentials invalid. Authorization not granted.')
 
@@ -426,8 +424,7 @@ class GoogleGrabber(Grabber):
 			if response.status_code == requests.codes.ok:
 				response_data = json.loads(response.text)
 				response_data['expires_at'] = (datetime.utcnow() + timedelta(seconds=int(response_data['expires_in']))).strftime("%Y%m%d%H%M%S")
-				with open(self.token_file, 'w') as out:
-					json.dump(response_data, out)
+				self.save_auth_to_file(json.dumps(response_data))
 				with open(self.refresh_file, 'w') as out:
 					json.dump(response_data, out)
 			else:
