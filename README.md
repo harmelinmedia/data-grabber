@@ -20,6 +20,4 @@ Example Configuration File
 
 
 
-]
-
 
