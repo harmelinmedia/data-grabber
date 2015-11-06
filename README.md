@@ -18,6 +18,13 @@ Example Configuration File
 }
 ```
 
+# TO DO
+* Set up package to use ~/.datagrabber as default config dir
+* set up package to be imported as system package
+* write "install" script to put on correct system path
+* develop scheduler
 
+# MAYBES
+* add auth credentials to conf file?
 
 
