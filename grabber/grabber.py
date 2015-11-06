@@ -12,6 +12,9 @@ from bs4 import BeautifulSoup
 # local imports
 from .errors import *
 
+#GLOBAL VARs
+DEFAULT_GRABBER_DIR = "~/.datagrabber"
+
 # Conf objects
 class Conf(object):
 
@@ -136,9 +139,9 @@ class Grabber(object):
 	_required_keys = ['name','files','urls']
 	_default_datetime_fmt = '%Y%m%d%H%M%S'
 
-	def __init__(self, conf):
+	def __init__(self, config_file):
 		logging.debug('Initializing Grabber')
-		self._parse_conf(conf) # load conf file
+		self._parse_conf(config_file) # load conf file
 		self.credentials_file = self.cpath("credentials")
 		self.token_file = self.cpath("token")
 		self.refresh_file = self.cpath("refresh")
@@ -283,6 +286,9 @@ class Grabber(object):
 
 class TubeMogulGrabber(Grabber):
 
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","tubemogul","conf")):
+		super().__init__(config_file)
+
 	def parse_credentials(self, fp):
 		return json.load(fp)
 
@@ -322,6 +328,9 @@ class TubeMogulGrabber(Grabber):
 
 class MediaMathGrabber(Grabber):
 
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","mediamath","conf")):
+		super().__init__(config_file)
+
 	def authenticate_request(self, ro):
 		"""takes Request() object as argument, applies authorization method, returns modified Request() object"""
 		auth = self.load_auth_from_file()
@@ -346,9 +355,6 @@ class MediaMathGrabber(Grabber):
 
 
 class GoogleGrabber(Grabber):
-
-	def __init__(self, conf):
-		super().__init__(conf)
 
 	def test_auth(self, *urlargs ):
 		return super().test_auth(self.profile_id, *urlargs)
@@ -433,13 +439,20 @@ class GoogleGrabber(Grabber):
 
 class DCMGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/dfareporting']
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","dcm","conf")):
+		super().__init__(config_file)
 
 
 class GoogleAnalyticsGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/analytics.readonly']
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","googleanalytics","conf")):
+		super().__init__(config_file)
 
 
 class PointrollGrabber(Grabber):
+
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","pointroll","conf")):
+		super().__init__(config_file)
 
 	def default_headers(self, **kwargs):
 		headers = {
