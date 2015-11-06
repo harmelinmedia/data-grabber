@@ -26,5 +26,5 @@ Example Configuration File
 
 # MAYBES
 * add auth credentials to conf file?
-
+* change default filenames to extension names, like credentials -> xxx.dgcredentials
 
