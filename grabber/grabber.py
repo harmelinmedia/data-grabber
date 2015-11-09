@@ -196,7 +196,7 @@ class Grabber(object):
 			with open(self.credentials_file, 'r') as fp:
 				return self.parse_credentials(fp)
 		except FileNotFoundError:
-			raise GrabberAuthMissingCredentialsFile("Credentials file was not found.")
+			raise GrabberAuthMissingCredentialsFile("Credentials file was not found at %s." % self.credentials_file )
 		except Exception as e:
 			raise GrabberAuthBadCredentialsFile("Credentials file could not be parsed.: "+e)
 
