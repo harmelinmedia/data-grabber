@@ -206,7 +206,7 @@ class Grabber(object):
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
 	
-	def request(self, url, method="get", headers=None, params=None, data=None, stream=False, *urlargs):
+	def request(self, url, method="get", headers=None, params=None, data=None, stream=False,urlargs=()):
 		"""Wrapper method to make an authenticated request in a single function call"""
 		ro = requests.Request(method=method, url=self.fill_url(url, *urlargs), params=params, data=data)
 		self.session.stream = stream
