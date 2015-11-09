@@ -205,12 +205,6 @@ class Grabber(object):
 		logging.info('Sending request')
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
-	
-	def request(self, url, method="get", headers=None, params=None, data=None, stream=False,urlargs=()):
-		"""Wrapper method to make an authenticated request in a single function call"""
-		ro = requests.Request(method=method, url=self.fill_url(url, urlargs=()), params=params, data=data)
-		self.session.stream = stream
-		return self.send(ro)
 
 	def authenticate(self):
 		logging.debug('Authenticating...')
@@ -222,6 +216,12 @@ class Grabber(object):
 			return test
 		except requests.exceptions.ConnectionError:
 			raise GrabberHTTPConnectionError("Connection could not be established. You may not be connected to the Internet.")
+
+	def request(self, url, method="get", headers=None, params=None, data=None, stream=False, urlargs=()):
+		"""Wrapper method to make an authenticated request in a single function call"""
+		ro = requests.Request(method=method, url=self.fill_url(url, *urlargs), headers=headers, params=params, data=data)
+		self.session.stream = stream
+		return self.send(ro)
 
 	def fill_url(self, url, *args):
 		return url % args
@@ -251,7 +251,7 @@ class Grabber(object):
 					fout.flush()
 		return filepath
 
-	def request_download(self, url, fname, ext=".csv", method="get", headers=None, params=None, data=None, stream=True, *urlargs):
+	def request_download(self, url, fname, ext=".csv", method="get", headers=None, params=None, data=None, stream=True, urlargs=()):
 		"""Wrapper method to make a request a download data in the same function call"""
 		ro = self.request(url=url, method=method, headers=headers, params=params, data=data, stream=stream, urlargs=urlargs )
 		if ro.status_code == 200:
