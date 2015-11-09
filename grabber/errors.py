@@ -59,3 +59,6 @@ class GrabberHTTPError(GrabberError, requests.exceptions.ConnectionError):
 
 class GrabberHTTPConnectionError(GrabberHTTPError):
 	pass
+
+class GrabberRequestDownloadResourceError(GrabberError):
+	pass

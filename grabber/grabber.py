@@ -253,7 +253,11 @@ class Grabber(object):
 
 	def request_download(self, url, fname, ext=".csv", method="get", headers=None, params=None, data=None, stream=True, *urlargs):
 		"""Wrapper method to make a request a download data in the same function call"""
-		return self.download_to_tmp( ro = self.request(url=url, method=method, headers=headers, params=params, data=data, stream=stream, *urlargs ), fname=fname, ext=ext )
+		ro = self.request(url=url, method=method, headers=headers, params=params, data=data, stream=stream, urlargs=urlargs )
+		if ro.status_code == 200:
+			return self.download_to_tmp(ro=ro, fname=fname, ext=ext)
+		else:
+			raise GrabberRequestDownloadResourceError("Request Download failed at %s with status code %s." % (ro.url, str(ro.status_code)))
 
 	### subclass methods
 	def save_auth_to_file(self, text):
