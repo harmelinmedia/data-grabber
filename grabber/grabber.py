@@ -257,7 +257,7 @@ class Grabber(object):
 		if ro.status_code == 200:
 			return self.download_to_tmp(ro=ro, fname=fname, ext=ext)
 		else:
-			raise GrabberRequestDownloadResourceError("Request Download failed at %s with status code %s." % (ro.url, str(ro.status_code)))
+			raise GrabberRequestDownloadResourceError("Request Download failed at %s with status code %s.\nReason:" % (ro.url, str(ro.status_code), ro.text))
 
 	### subclass methods
 	def save_auth_to_file(self, text):
