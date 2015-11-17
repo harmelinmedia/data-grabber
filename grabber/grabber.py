@@ -202,7 +202,7 @@ class Grabber(object):
 
 	def send(self, ro, stream=True):
 		"""Authenticates request using `authenticate_request` method defined in subclass before sending"""
-		logging.info('Sending request')
+		logging.debug('Sending request')
 		ro = self.authenticate_request(ro)
 		return self.session.send(ro.prepare())
 
@@ -242,8 +242,8 @@ class Grabber(object):
 
 	def download_to_tmp(self, ro, fname, ext='.csv', chunk_size_mb=5):
 		"""takes streaming request object and saves to temporary file, default chunk size is 5 Mb"""
-		logging.info('Saving temp file')
 		filepath = os.path.join( self.files.tmp, '_'.join([ 'tmp', self.name, fname, self.timestamp() ]) + ext )
+		logging.info('Saving temp file: ' + filepath)
 		with open( filepath, 'wb' ) as fout:
 			for chunk in ro.iter_content( chunk_size= chunk_size_mb * 2**20): #n mb per chunk
 				if chunk:
