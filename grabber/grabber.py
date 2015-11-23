@@ -77,7 +77,7 @@ class FileConf(Conf):
 		for key, val in data.items():
 			if key != "auth":
 				if not os.path.exists(val):
-					logging.debug("Creating directory: %s" % val)
+					logging.info("Creating directory: %s" % val)
 					os.makedirs(val)
 
 class URLConf(Conf):
@@ -268,7 +268,7 @@ class Grabber(object):
 		try:
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
-		except (FileNotFoundError, GrabberAuthBadAuthFile, json.decoder.JSONDecodeError, KeyError):
+		except (FileNotFoundError, GrabberAuthBadAuthFile, ValueError, KeyError):
 			self.refresh_auth_data()
 			with open(self.token_file, 'r') as tk:
 				return self.parse_auth_data(tk)
@@ -450,6 +450,11 @@ class DCMGrabber(GoogleGrabber):
 class GoogleAnalyticsGrabber(GoogleGrabber):
 	scope = ['https://www.googleapis.com/auth/analytics.readonly']
 	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","googleanalytics","conf")):
+		super().__init__(config_file)
+
+class DBMGrabber(GoogleGrabber):
+	scope = ['https://www.googleapis.com/auth/doubleclickbidmanager']
+	def __init__(self, config_file = os.path.join(DEFAULT_GRABBER_DIR,"apis","googlebidmanager","conf")):
 		super().__init__(config_file)
 
 
